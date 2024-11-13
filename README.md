@@ -18,11 +18,11 @@ An overlay is converting all EEP data to Home Assistant data model thanks to map
 # Intended API #
 
 Functions:
-connect(sender_id) : initialize the gateway with the following sender_id
-add_device(dev_id, EEP) : register a device using EEP
-add_device(dev_id, model_id) : register a device using model identifier
-send_command(device, ...)
+* connect(sender_id) : initialize the gateway with the following sender_id
+* add_device(dev_id, EEP) : register a device using EEP
+* add_device(dev_id, model_id) : register a device using model identifier
+* send_command(device, ...)
 
 Callbacks:
-entity_updated
+* entity_updated
 
