@@ -5,12 +5,12 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    name='enocean',
-    version='0.60.1',
-    description='EnOcean serial protocol implementation',
-    author='Kimmo Huoman',
-    author_email='kipenroskaposti@gmail.com',
-    url='https://github.com/kipe/enocean',
+    name='aioenocean',
+    version='0.0.1',
+    description='Asyncio EnOcean serial protocol implementation',
+    author='ChristopheHD',
+    author_email='',
+    url='https://github.com/ChristopheHD/aioenocean',
     packages=[
         'enocean',
         'enocean.protocol',
