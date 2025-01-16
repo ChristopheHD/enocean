@@ -1096,6 +1096,14 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 </blockquote></details>
 
 <details open><summary>30 <i>(Digital Input)</i></summary><blockquote>
+<details><summary>A5-30-02 <i>(Single Input Contact)</i></summary><blockquote>
+
+|shortcut|description                                       |type    |values                                                                |
+|--------|--------------------------------------------------|--------|----                                                                  |
+|IPS     |Input State                                       |enum    |0 - Contact closed                                                            |
+|        |                                                  |        |1 - Contact open                                                              |
+
+</blockquote></details>
 <details><summary>A5-30-03 <i>(4 Digital Inputs, Wake and Temperature)</i></summary><blockquote>
 
 |shortcut|description                                       |type    |values                                                                |
