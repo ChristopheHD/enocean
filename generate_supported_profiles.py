@@ -14,11 +14,15 @@ with codecs.open('SUPPORTED_PROFILES.md', 'w', 'utf-8') as f_handle:
     f_handle.write('All profiles (should) correspond to the official [EEP](http://www.enocean-alliance.org/eep/) by EnOcean.\n\n')
 
     for telegram in eep.soup.find_all('telegram'):
-        f_handle.write('### %s (%s)\n' % (telegram['description'], telegram['rorg']))
+        f_handle.write('<details open><summary>%s <i>(%s)</i></summary><blockquote>\n' % (telegram['rorg'][2:], telegram['description']))
         for func in telegram.find_all('profiles'):
             # f_handle.write('#####  FUNC %s - %s\n' % (func['func'], func['description']))
+            f_handle.write('<details open><summary>%s <i>(%s)</i></summary><blockquote>\n' % (func['func'][2:], func['description']))
             for profile in func.find_all('profile'):
-                f_handle.write('##### RORG %s - FUNC %s - TYPE %s - %s\n\n' % (telegram['rorg'], func['func'], profile['type'], profile['description']))
+                f_handle.write('<details><summary>%s-%s-%s <i>(%s)</i></summary><blockquote>\n\n' % (telegram['rorg'][2:],
+                                                      func['func'][2:],
+                                                      profile['type'][2:],
+                                                      profile['description']))
 
                 for data in profile.find_all('data'):
                     header = []
@@ -64,6 +68,8 @@ with codecs.open('SUPPORTED_PROFILES.md', 'w', 'utf-8') as f_handle:
                         for i in range(1, len(values)):
                             f_handle.write(ROW_FORMAT.format('', '', '', values[i]))
                     f_handle.write('\n')
-                f_handle.write('\n')
 
-            f_handle.write('\n')
+                f_handle.write('</blockquote></details>\n\n')
+
+            f_handle.write('</blockquote></details>\n\n')
+        f_handle.write('</blockquote></details>\n')
