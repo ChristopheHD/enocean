@@ -22,10 +22,10 @@ class EEP(object):
         try:
             if version_info[0] > 2:
                 with open(eep_path, 'r', encoding='UTF-8') as xml_file:
-                    self.soup = BeautifulSoup(xml_file.read(), "lxml")
+                    self.soup = BeautifulSoup(xml_file.read(), "lxml-xml")
             else:
                 with open(eep_path, 'r') as xml_file:
-                    self.soup = BeautifulSoup(xml_file.read(), "lxml")
+                    self.soup = BeautifulSoup(xml_file.read(), "lxml-xml")
             self.init_ok = True
             self.__load_xml()
         except IOError:
