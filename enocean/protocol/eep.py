@@ -22,10 +22,10 @@ class EEP(object):
         try:
             if version_info[0] > 2:
                 with open(eep_path, 'r', encoding='UTF-8') as xml_file:
-                    self.soup = BeautifulSoup(xml_file.read(), "lxml-xml")
+                    self.soup = BeautifulSoup(xml_file.read(), "html.parser")
             else:
                 with open(eep_path, 'r') as xml_file:
-                    self.soup = BeautifulSoup(xml_file.read(), "lxml-xml")
+                    self.soup = BeautifulSoup(xml_file.read(), "html.parser")
             self.init_ok = True
             self.__load_xml()
         except IOError:
@@ -228,7 +228,7 @@ class EEP(object):
                 data = self._set_enum(target, value, data)
             if target.name == 'status':
                 status = self._set_boolean(target, value, status)
-                self.logger.warning('Status set to %s with value %s', hex(status), hex(value))
+                # self.logger.warning('Status set to %s with value %s', hex(status), hex(value))
 
-        self.logger.warning('Status %s', hex(status))
+        # self.logger.warning('Status %s', hex(status))
         return data, status
