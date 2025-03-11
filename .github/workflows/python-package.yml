@@ -36,7 +36,7 @@ jobs:
         flake8 enocean --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
     - name: Test with nose
       run: |
-        nosetests -s -q --with-coverage --cover-package=enocean
+        pytest -s -q --with-coverage --cover-package=enocean
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
