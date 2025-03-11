@@ -228,4 +228,7 @@ class EEP(object):
                 data = self._set_enum(target, value, data)
             if target.name == 'status':
                 status = self._set_boolean(target, value, status)
+                self.logger.debug('Status set to %02x with value %02x', status, value)
+
+        self.logger.debug('Status %02x', status)
         return data, status
