@@ -39,7 +39,13 @@ jobs:
         flake8 enocean --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest -s -q --cov=./enocean --cov-report=term-missing ./enocean/
+        pytest -s -q --cov=./enocean --cov-report=term-missing --junitxml=junit/test-results-${{ matrix.python-version }}.xml ./enocean/
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: junit/test-results-${{ matrix.python-version }}.xml
+      if: ${{ always() }}
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
