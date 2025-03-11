@@ -34,9 +34,9 @@ jobs:
         flake8 enocean --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 enocean --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
-    - name: Test with nose
+    - name: Test with pytest
       run: |
-        pytest -s -q --with-coverage --cover-package=enocean
+        pytest --black --cov=./enocean --cov-report=term-missing enocean
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
