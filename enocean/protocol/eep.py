@@ -241,7 +241,7 @@ class EEP(object):
                 data = self._set_enum(target, value, data)
             if target.name == 'status':
                 status = self._set_boolean(target, value, status)
-                # self.logger.warning('Status set to %s with value %s', hex(status), hex(value))
+                self.logger.warning('Status set to'+status)
 
         # self.logger.warning('Status %s', hex(status))
         return data, status
