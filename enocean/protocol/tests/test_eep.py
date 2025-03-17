@@ -186,7 +186,7 @@ def test_vld():
     assert p.parsed['PF']['value'] == 'Power Failure Detection disabled/not supported'
 
     assert p.parsed['PFD']['raw_value'] == 0
-    assert p.parsed['PFD']['value'] == 'Power Failure Detection not detected/not supported/disabled'
+    assert p.parsed['PFD']['value'] == 'Power Failure not detected/not supported/disabled'
 
     assert p.parsed['IO']['raw_value'] == 0
     assert p.parsed['IO']['value'] == 'Output channel 0 (to load)'
@@ -218,7 +218,7 @@ def test_vld():
     assert p.parsed['PF']['value'] == 'Power Failure Detection disabled/not supported'
 
     assert p.parsed['PFD']['raw_value'] == 0
-    assert p.parsed['PFD']['value'] == 'Power Failure Detection not detected/not supported/disabled'
+    assert p.parsed['PFD']['value'] == 'Power Failure not detected/not supported/disabled'
 
     assert p.parsed['IO']['raw_value'] == 0
     assert p.parsed['IO']['value'] == 'Output channel 0 (to load)'
