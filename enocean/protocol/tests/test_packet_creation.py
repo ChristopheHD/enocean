@@ -220,6 +220,7 @@ def test_switch():
     packet_serialized = packet.build()
     assert len(packet_serialized) == len(SWITCH)
     assert list(packet_serialized) == list(SWITCH)
+    assert packet.status == 0x30
 
     SWITCH = bytearray([
         0x55,
