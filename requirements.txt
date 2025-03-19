@@ -1,2 +1,2 @@
-pyserial>=3.0
+pyserial>=3.5
 beautifulsoup4>=4.13.3
