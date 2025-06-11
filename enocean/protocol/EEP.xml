@@ -64,6 +64,19 @@
           <status description="NU" shortcut="NU" offset="3" size="1" />
         </data>
       </profile>
+      <profile type="0x03" description="Light Control - Application Style 1">
+        <data>
+          <enum description="Rocker action" shortcut="RA" offset="0" size="8">
+		        <item description="Button Released" value="0" />
+            <item description="Button A1" value="0x10" />
+            <item description="Button AO" value="0x30" />
+            <item description="Button B1" value="0x50" />
+            <item description="Button BO" value="0x70" />
+          </enum>
+          <status description="T21" shortcut="T21" offset="2" size="1" />
+          <status description="NU" shortcut="NU" offset="3" size="1" />
+        </data>
+      </profile>
     </profiles>
     <profiles func="0x04" description="Position Switch, Home and Office Application">
       <profile type="0x01" description="Key Card Activated Switch">
