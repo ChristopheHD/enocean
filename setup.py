@@ -6,11 +6,14 @@ except ImportError:
 
 setup(
     name='enocean',
-    version='0.60.1',
+    version='0.60.2',
     description='EnOcean serial protocol implementation',
     author='Kimmo Huoman',
     author_email='kipenroskaposti@gmail.com',
     url='https://github.com/kipe/enocean',
+    classifiers = [
+        'License :: OSI Approved :: MIT License',
+    ],
     packages=[
         'enocean',
         'enocean.protocol',
