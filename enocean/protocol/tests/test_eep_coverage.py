@@ -10,7 +10,7 @@ class TestEEPCoverage(TestCase):
 
     def test_io_error(self):
         ''' Test IOError handling '''
-        eep_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'EEP.xml')
+        eep_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'EEP.xml')
         backup_path = eep_path + '.bak'
         # ensure backup does not exist
         if os.path.exists(backup_path):
