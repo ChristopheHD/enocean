@@ -13,8 +13,24 @@ class SerialCommunicator(Communicator):
 
     def __init__(self, port='/dev/ttyAMA0', callback=None):
         super(SerialCommunicator, self).__init__(callback)
+        self.port = port
         # Initialize serial port
-        self.__ser = serial.Serial(port, 57600, timeout=0.1)
+        self.__ser = serial.Serial(self.port, 57600, timeout=0.1)
+
+    def _reset_serial_port(self):
+        ''' Close and reopen serial port to recover from a stuck state '''
+        self.logger.warning('Resetting serial port...')
+        if self.__ser.is_open:
+            self.__ser.close()
+
+        time.sleep(1)
+
+        try:
+            self.__ser.open()
+            self.logger.info('Serial port reset.')
+        except serial.SerialException as e:
+            self.logger.error('Error resetting serial port: %s', e)
+            self.stop()
 
     def run(self):
         self.logger.info('SerialCommunicator started')
@@ -32,15 +48,31 @@ class SerialCommunicator(Communicator):
 
             # Read chars from serial port as hex numbers
             try:
-                self._buffer.extend(bytearray(self.__ser.read(16)))
+                if self.__ser.is_open:
+                    self._buffer.extend(bytearray(self.__ser.read(16)))
+                else:
+                    time.sleep(1)
+                    self._reset_serial_port()
+                    continue
             except serial.SerialException:
                 self.logger.error('Serial port exception! (device disconnected or multiple access on port?)')
                 self.stop()
+                break
+
             try:
                 self.parse()
+            except IndexError:
+                self.logger.error('List index out of range error during parsing. This indicates a malformed packet.')
+                self.logger.debug('Buffer that caused error: %s', [hex(r) for r in self._buffer])
+                self._buffer[:] = []
+                self._reset_serial_port()
             except Exception as e:
-                self.logger.error('Exception occured while parsing: ' + str(e))
+                self.logger.error('Exception occured while parsing: %s', e)
+                self.logger.debug('Buffer that caused error: %s', [hex(r) for r in self._buffer])
+                self._buffer[:] = []
+
             time.sleep(0)
 
-        self.__ser.close()
+        if self.__ser.is_open:
+            self.__ser.close()
         self.logger.info('SerialCommunicator stopped')
