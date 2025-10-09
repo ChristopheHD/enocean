@@ -101,7 +101,7 @@ class Communicator(threading.Thread):
         start = datetime.datetime.now()
 
         # Send COMMON_COMMAND 0x08, CO_RD_IDBASE request to the module
-        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_IDBASE.value]))
+        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_IDBASE.value], optional=[]))
 
         # wait at most 1 second for the response
         while True:
@@ -153,7 +153,7 @@ class Communicator(threading.Thread):
         start = datetime.datetime.now()
 
         # Send COMMON_COMMAND 0x03, CO_RD_VERSION request to the module
-        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_VERSION.value]))
+        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_VERSION.value], optional=[]))
 
         # wait at most 1 second for the response
         while True:
