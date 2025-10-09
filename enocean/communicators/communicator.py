@@ -159,7 +159,7 @@ class Communicator(threading.Thread):
         while True:
             seconds_elapsed = (datetime.datetime.now() - start).total_seconds()
             if seconds_elapsed > 1:
-                self.logger.error("Could not obtain version info from module within 1 second (timeout).")
+                LOGGER.warning("Could not obtain version info from module within 1 second (timeout).")
                 break
 
             try:
