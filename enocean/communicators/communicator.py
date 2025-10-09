@@ -8,6 +8,7 @@ from typing import Union
 
 from ..protocol.constants import COMMON_COMMAND, PACKET, PARSE_RESULT, RETURN_CODE
 from ..protocol.packet import Packet, UTETeachInPacket
+from ..protocol.version_info import VersionInfo
 
 LOGGER = logging.getLogger('enocean.communicators.Communicator')
 
@@ -100,7 +101,7 @@ class Communicator(threading.Thread):
         start = datetime.datetime.now()
 
         # Send COMMON_COMMAND 0x08, CO_RD_IDBASE request to the module
-        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND_CODE.CO_RD_IDBASE.value]))
+        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_IDBASE.value]))
 
         # wait at most 1 second for the response
         while True:
@@ -152,7 +153,7 @@ class Communicator(threading.Thread):
         start = datetime.datetime.now()
 
         # Send COMMON_COMMAND 0x03, CO_RD_VERSION request to the module
-        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND_CODE.CO_RD_VERSION.value]))
+        self.send(Packet(PACKET.COMMON_COMMAND, data=[COMMON_COMMAND.CO_RD_VERSION.value]))
 
         # wait at most 1 second for the response
         while True:
