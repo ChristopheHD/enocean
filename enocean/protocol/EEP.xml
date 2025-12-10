@@ -5440,7 +5440,7 @@
             <item description="Repeater disabled" value="0" />
             <item description="Repeater enabled" value="1" />
           </enum>
-          <enum description="Repeater level" shortcut="RS" offset="32" size="8">
+          <enum description="Repeater level" shortcut="RL" offset="32" size="8">
             <rangeitem description="Repeater level {value}" start="0" end="2" />
           </enum>
         </data>
