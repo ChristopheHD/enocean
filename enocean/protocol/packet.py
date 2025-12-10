@@ -211,9 +211,8 @@ class Packet(object):
         packet = Packet(packet_type, data=[], optional=[])
         packet.rorg = rorg
         packet.data = [packet.rorg]
-        # Select EEP at this point, so we know how many bits we're dealing with (for VLD).
-        if rorg is not RORG.MSC
-            packet.select_eep(rorg_func, rorg_type, direction, command)
+        # Select EEP at this point, so we know how many bits we're dealing with (for VLD and MSC).
+        packet.select_eep(rorg_func, rorg_type, direction, command)
 
         # Initialize data depending on the profile.
         if rorg in [RORG.RPS, RORG.BS1]:
