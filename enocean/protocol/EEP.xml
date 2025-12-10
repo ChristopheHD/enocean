@@ -5453,7 +5453,7 @@
              <item description="Get repeater status" value="9" />
           </enum>
         </data>
-      </profiles>
+      </profile>
     </profiles>
   </telegram>
 </telegrams>
