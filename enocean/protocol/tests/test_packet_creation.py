@@ -40,6 +40,14 @@ def test_packet_assembly():
         0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
         0x80
     ])
+    PACKET_CONTENT_5 = bytearray([
+        0x55,
+        0x00, 0x0A, 0x07, 0x01,
+        0xEB,
+        0xD1, 0x46, 0x00, 0x08, 0x01, 0xDE, 0xAD, 0xBE, 0xEF, 0x00,
+        0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
+        0x80
+    ])
 
     # manually assemble packet
     packet = Packet(PACKET.RADIO_ERP1)
@@ -97,6 +105,14 @@ def test_packet_assembly():
     assert list(packet_serialized) == list(PACKET_CONTENT_4)
     assert packet.rorg_func == 0x20
     assert packet.rorg_type == 0x01
+
+    # Test creating RadioPacket directly for MSC
+    packet = RadioPacket.create(rorg=RORG.MSC, rorg_func=0x46, rorg_type=0x00, learn=False, MID=70, MT=8, RS=1, RL=1)
+    packet_serialized = packet.build()
+    assert len(packet_serialized) == len(PACKET_CONTENT_5)
+    assert list(packet_serialized) == list(PACKET_CONTENT_5)
+    assert packet.rorg_func == 0x46
+    assert packet.rorg_type == 0x00
 
 
 # Corresponds to the tests done in test_eep
