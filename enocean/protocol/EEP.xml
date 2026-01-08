@@ -5424,7 +5424,7 @@
   <telegram rorg="0xD1" type="MSC" description="MSC Telegram">
     <profiles func="0x46" description="ID RF">
       <profile type="0x00" description="Repeater">
-        <command description="Message Type" shortcut="MT" offset="16" size="8">
+        <command description="Message type" shortcut="CMD" offset="16" size="8">
           <item description="Set repeater level" value="8" />
           <item description="Get repeater status" value="9" />
         </command>
@@ -5432,7 +5432,7 @@
           <enum description="Manufacturer ID" shortcut="MID" offset="0" size="8">
             <item description="ID RF" value="70" />
           </enum>
-          <enum description="Message Type" shortcut="MT" offset="16" size="8">
+          <enum description="Message Type" shortcut="CMD" offset="16" size="8">
              <item description="Set repeater level" value="8" />
              <item description="Get repeater status" value="9" />
           </enum>
@@ -5448,7 +5448,7 @@
           <enum description="Manufacturer ID" shortcut="MID" offset="0" size="8">
             <item description="ID RF" value="70" />
           </enum>
-          <enum description="Message Type" shortcut="MT" offset="16" size="8">
+          <enum description="Message Type" shortcut="CMD" offset="16" size="8">
              <item description="Set repeater level" value="8" />
              <item description="Get repeater status" value="9" />
           </enum>
