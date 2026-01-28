@@ -109,6 +109,7 @@ def test_packet_assembly():
     # Test creating RadioPacket directly for MSC
     packet = RadioPacket.create(rorg=RORG.MSC, rorg_func=0x46, rorg_type=0x00, learn=False, command=8, MID=70, CMD=8, RS=1, RL=1)
     packet_serialized = packet.build()
+    print packet_serialized
     assert len(packet_serialized) == len(PACKET_CONTENT_5)
     assert list(packet_serialized) == list(PACKET_CONTENT_5)
     assert packet.rorg_func == 0x46
