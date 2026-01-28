@@ -107,7 +107,8 @@ def test_packet_assembly():
     assert packet.rorg_type == 0x01
 
     # Test creating RadioPacket directly for MSC
-    packet = RadioPacket.create(rorg=RORG.MSC, rorg_func=0x46, rorg_type=0x00, learn=False, command=8, MID=70, CMD=8, RS=1, RL=1)
+    packet = RadioPacket.create(rorg=RORG.MSC, rorg_func=0x46, rorg_type=0x00, learn=False, command=8,
+                                MID=70, CMD=8, RS=1, RL=1)
     packet_serialized = packet.build()
     print(packet_serialized)
     assert len(packet_serialized) == len(PACKET_CONTENT_5)
@@ -227,10 +228,10 @@ def test_switch():
     ])
 
     # test virtual rocker switch
-    packet = RadioPacket.create(rorg=RORG.RPS, rorg_func=0x02, rorg_type=0x01, 
+    packet = RadioPacket.create(rorg=RORG.RPS, rorg_func=0x02, rorg_type=0x01,
                                 direction=None, command=None, sender=[0xFF, 0xBF, 0xA4, 0x82],
-                               destination=None, learn=False)
-    data = {"R1": 0, "EB":1, "R2":0, "SA":0, "T21":1, "NU":1}
+                                destination=None, learn=False)
+    data = {"R1": 0, "EB": 1, "R2": 0, "SA": 0, "T21": 1, "NU": 1}
     packet.set_eep(data)
     assert packet.status == 0x30
     packet.data[-1] = packet.status
@@ -239,7 +240,7 @@ def test_switch():
     assert len(packet_serialized) == len(SWITCH)
     assert list(packet_serialized) == list(SWITCH)
     assert packet.status == 0x30
-    
+
     SWITCH = bytearray([
         0x55,
         0x00, 0x07, 0x07, 0x01,
