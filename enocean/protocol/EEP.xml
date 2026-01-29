@@ -5429,7 +5429,7 @@
           <item description="Get repeater status" value="9" />
         </command>
         <data command="8" bits="5">
-          <enum description="Manufacturer ID" shortcut="MID" offset="0" size="8">
+          <enum description="Manufacturer ID" shortcut="MID" offset="8" size="8">
             <item description="ID RF" value="70" />
           </enum>
           <enum description="Message Type" shortcut="CMD" offset="16" size="8">
@@ -5445,7 +5445,7 @@
           </enum>
         </data>
         <data command="9" bits="3">
-          <enum description="Manufacturer ID" shortcut="MID" offset="0" size="8">
+          <enum description="Manufacturer ID" shortcut="MID" offset="8" size="8">
             <item description="ID RF" value="70" />
           </enum>
           <enum description="Message Type" shortcut="CMD" offset="16" size="8">
