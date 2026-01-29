@@ -754,7 +754,7 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |ID      |Identifier                                        |enum    |0-15 - Identifier {value}                                             |
 |TMF     |Time Format                                       |enum    |0 - 24 Hours                                                          |
 |        |                                                  |        |1 - 12 Hours                                                          |
-|AMPM    |AM/PM                                             |enum    |0 - AM                                                                |
+|A/PM    |AM/PM                                             |enum    |0 - AM                                                                |
 |        |                                                  |        |1 - PM                                                                |
 |SRC     |Source                                            |enum    |0 - Real Time Clock                                                   |
 |        |                                                  |        |1 - GPS or equivalent (e.g. DCF77, WWV)                               |
@@ -820,7 +820,7 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |ID      |Identifier                                        |enum    |0-15 - Identifier {value}                                             |
 |TMF     |Time Format                                       |enum    |0 - 24 Hours                                                          |
 |        |                                                  |        |1 - 12 Hours                                                          |
-|AMPM    |AM/PM                                             |enum    |0 - AM                                                                |
+|A/PM    |AM/PM                                             |enum    |0 - AM                                                                |
 |        |                                                  |        |1 - PM                                                                |
 |SRC     |Source                                            |enum    |0 - Real Time Clock                                                   |
 |        |                                                  |        |1 - GPS or equivalent (e.g. DCF77, WWV)                               |
@@ -864,13 +864,13 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 
 <details><summary>A5-14-09 <i>(Window/Door-Sensor with States Open/Closed/Tilt, Supply voltage monitor)</i></summary><blockquote>
 
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|SVC     |Supply voltage / super cap. (linear)              |value   |0.0-250.0 ↔ 0.0-5.0 V                                                 |
-|CT      |Contact                                           |enum    |0 - Closed                                                            |
-|        |                                                  |        |1 - Tilt                                                              |
-|        |                                                  |        |2 - Reserved                                                          |
-|        |                                                  |        |3 - Open                                                              |
+| shortcut | description                          | type  | values                |
+| -------- | ------------------------------------ | ----- | --------------------- |
+| SVC      | Supply voltage / super cap. (linear) | value | 0.0-250.0 ↔ 0.0-5.0 V |
+| CT       | Contact                              | enum  | 0 - Closed            |
+|          |                                      |       | 1 - Tilt              |
+|          |                                      |       | 2 - Reserved          |
+|          |                                      |       | 3 - Open              |
 
 </blockquote></details>
 
@@ -1233,21 +1233,13 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |101-126 - Not used                                                    |
 |        |                                                  |        |127 - output value not valid / not set                                |
 
-###### command: 3
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - All output channels supported by the device                      |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-
 ###### command: 4
 |shortcut|description                                       |type    |values                                                                |
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1264,110 +1256,6 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |1-100 - Output value {value}% or ON                                   |
 |        |                                                  |        |101-126 - Not used                                                    |
 |        |                                                  |        |127 - output value not valid / not set                                |
-
-</blockquote></details>
-
-<details><summary>D2-01-08 <i>(Type 0x08)</i></summary><blockquote>
-
-###### command: 1
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|DV      |Dim value                                         |enum    |0 - Switch to new output value                                        |
-|        |                                                  |        |1 - Dim to new output level - dim timer 1                             |
-|        |                                                  |        |2 - Dim to new output level - dim timer 2                             |
-|        |                                                  |        |3 - Dim to new output level - dim timer 3                             |
-|        |                                                  |        |4 - Stop dimming                                                      |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - All output channels supported by the device                      |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-|OV      |Output value                                      |enum    |0 - Output value 0% or OFF                                            |
-|        |                                                  |        |1-100 - Output value {value}% or ON                                   |
-|        |                                                  |        |101-126 - Not used                                                    |
-|        |                                                  |        |127 - output value not valid / not set                                |
-
-###### command: 3
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - All output channels supported by the device                      |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-
-###### command: 4
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
-|        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
-|        |                                                  |        |1 - Over current switch off: executed                                 |
-|EL      |Error level                                       |enum    |0 - Error level 0: hardware OK                                        |
-|        |                                                  |        |1 - Error level 1: hardware warning                                   |
-|        |                                                  |        |2 - Error level 2: hardware failure                                   |
-|        |                                                  |        |3 - Error level not supported                                         |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - Not applicable, do not use                                       |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-|LC      |Local control                                     |enum    |0 - Local control disabled / not supported                            |
-|        |                                                  |        |1 - Local control enabled                                             |
-|OV      |Output value                                      |enum    |0 - Output value 0% or OFF                                            |
-|        |                                                  |        |1-100 - Output value {value}% or ON                                   |
-|        |                                                  |        |101-126 - Not used                                                    |
-|        |                                                  |        |127 - output value not valid / not set                                |
-
-###### command: 5
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|RM      |Report measurement                                |enum    |0 - Query only                                                        |
-|        |                                                  |        |1 - Query / auto                                                      |
-|RE      |Reset measurement                                 |enum    |0 - Not active                                                        |
-|        |                                                  |        |1 - Trigger signal                                                    |
-|ep      |Measurement mode                                  |enum    |0 - Energy                                                            |
-|        |                                                  |        |1 - Power                                                             |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - Not applicable, do not use                                       |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-|MD_LSB  |Measurement delta LSB                             |enum    |0-15 - Measurement delta LSB {value}                                  |
-|UN      |Unit                                              |enum    |0 - Energy [Ws]                                                       |
-|        |                                                  |        |1 - Energy [Wh]                                                       |
-|        |                                                  |        |2 - Energy [KWh]                                                      |
-|        |                                                  |        |3 - Power [W]                                                         |
-|        |                                                  |        |4 - Power [KW]                                                        |
-|        |                                                  |        |5-7 - Not used                                                        |
-|MD_MSB  |Measurement delta MSB                             |enum    |0-255 - Measurement delta MSB {value}                                 |
-|MAT     |Max message time                                  |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-255 - Max message time {value}                                      |
-|MIT     |Min message time                                  |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-255 - Min message time {value}                                      |
-
-###### command: 6
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|qu      |Query                                             |enum    |0 - Query energy                                                      |
-|        |                                                  |        |1 - Query power                                                       |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - All output channels supported by the device                      |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-
-###### command: 7
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
-|UN      |Unit                                              |enum    |0 - Energy [Ws]                                                       |
-|        |                                                  |        |1 - Energy [Wh]                                                       |
-|        |                                                  |        |2 - Energy [KWh]                                                      |
-|        |                                                  |        |3 - Power [W]                                                         |
-|        |                                                  |        |4 - Power [KW]                                                        |
-|        |                                                  |        |5-7 - Not used                                                        |
-|IO      |I/O channel                                       |enum    |0-29 - Output channel {value} (to load)                               |
-|        |                                                  |        |30 - Not applicable, do not use                                       |
-|        |                                                  |        |31 - Input channel (from mains supply)                                |
-|MV      |Measurement value                                 |enum    |0-4294967295 - Measurement value {value}                              |
 
 </blockquote></details>
 
@@ -1403,8 +1291,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1507,8 +1395,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1560,8 +1448,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1664,8 +1552,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1795,8 +1683,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1848,8 +1736,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -1952,8 +1840,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -2005,8 +1893,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |PF      |Power Failure                                     |enum    |0 - Power Failure Detection disabled/not supported                    |
 |        |                                                  |        |1 - Power Failure Detection enabled                                   |
-|PFD     |Power Failure Detection                           |enum    |0 - Power Failure not detected/not supported/disabled                 |
-|        |                                                  |        |1 - Power Failure Detected                                            |
+|PFD     |Power Failure Detection                           |enum    |0 - Power Failure Detection not detected/not supported/disabled       |
+|        |                                                  |        |1 - Power Failure Detection Detected                                  |
 |CMD     |Command identifier                                |enum    |0-13 - Command ID {value}                                             |
 |OC      |Over current switch off                           |enum    |0 - Over current switch off: ready / not supported                    |
 |        |                                                  |        |1 - Over current switch off: executed                                 |
@@ -2102,74 +1990,6 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |2 - Channel 3                                                         |
 |        |                                                  |        |3 - Channel 4                                                         |
 |CMD     |Command Id                                        |enum    |0-5 - Command ID {value}                                              |
-
-</blockquote></details>
-
-<details><summary>D2-05-02 <i>(Type 0x02)</i></summary><blockquote>
-
-###### command: 1
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|POS     |Vertical position                                 |enum    |0-100 - Output position {value}%                                      |
-|        |                                                  |        |127 - Do not change                                                   |
-|ANG     |Rotation angle                                    |enum    |0-100 - Output angle {value}%                                         |
-|        |                                                  |        |127 - Do not change                                                   |
-|REPO    |Repositioning                                     |enum    |0 - Go directly to POS/ANG                                            |
-|        |                                                  |        |1 - Go up (0%), then to POS/ANG                                       |
-|        |                                                  |        |2 - Go down (100%), then to POS/ANG                                   |
-|        |                                                  |        |3 - Reserved                                                          |
-|LOCK    |Locking modes                                     |enum    |0 - Do not change                                                     |
-|        |                                                  |        |1 - Set blockage mode                                                 |
-|        |                                                  |        |2 - Reserved                                                          |
-|        |                                                  |        |3 - Reserved                                                          |
-|        |                                                  |        |4 - Reserved                                                          |
-|        |                                                  |        |5 - Reserved                                                          |
-|        |                                                  |        |6 - Reserved                                                          |
-|        |                                                  |        |7 - Deblockage                                                        |
-|CHN     |Channel                                           |enum    |0 - Channel 1                                                         |
-|        |                                                  |        |1-15 - Reserved {value}                                               |
-|CMD     |Command Id                                        |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-4 - Command ID {value}                                              |
-|        |                                                  |        |5-15 - Reserved {value}                                               |
-
-###### command: 2
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CHN     |Channel                                           |enum    |0 - Channel 1                                                         |
-|        |                                                  |        |1-15 - Reserved {value}                                               |
-|CMD     |Command Id                                        |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-4 - Command ID {value}                                              |
-|        |                                                  |        |5-15 - Reserved {value}                                               |
-
-###### command: 3
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|CHN     |Channel                                           |enum    |0 - Channel 1                                                         |
-|        |                                                  |        |1-15 - Reserved {value}                                               |
-|CMD     |Command Id                                        |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-4 - Command ID {value}                                              |
-|        |                                                  |        |5-15 - Reserved {value}                                               |
-
-###### command: 4
-|shortcut|description                                       |type    |values                                                                |
-|--------|--------------------------------------------------|--------|----                                                                  |
-|POS     |Current vertical position                         |enum    |0-100 - Output position {value}%                                      |
-|        |                                                  |        |127 - Position unknown, will be known after the next goto cmd         |
-|ANG     |Current rotation angle                            |enum    |0-100 - Output angle {value}%                                         |
-|        |                                                  |        |127 - Angle unknown, will be known after the next goto cmd            |
-|LOCK    |Current locking mode                              |enum    |0 - Normal (no lock)                                                  |
-|        |                                                  |        |1 - Blockage mode                                                     |
-|        |                                                  |        |2 - Reserved                                                          |
-|        |                                                  |        |3 - Reserved                                                          |
-|        |                                                  |        |4 - Reserved                                                          |
-|        |                                                  |        |5 - Reserved                                                          |
-|        |                                                  |        |6 - Reserved                                                          |
-|        |                                                  |        |7 - Reserved                                                          |
-|CHN     |Channel                                           |enum    |0 - Channel 1                                                         |
-|        |                                                  |        |1-15 - Reserved {value}                                               |
-|CMD     |Command Id                                        |enum    |0 - Reserved                                                          |
-|        |                                                  |        |1-4 - Command ID {value}                                              |
-|        |                                                  |        |5-15 - Reserved {value}                                               |
 
 </blockquote></details>
 
@@ -2328,8 +2148,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |4-7 - Reserved {value}                                                |
 |SVI     |Software Version Info                             |value   |0.0-4095.0 ↔ 0.0-4095.0                                               |
 |OHC     |Operation Hours Counter                           |value   |0.0-65535.0 ↔ 0.0-196605.0                                            |
-|IMS     |Info Message 0...15 Status                        |enum    |0-65535 - {value}                                                     |
-|FS      |Fault 0...31 Status                               |enum    |0-4294967295 - {value}                                                |
+|IMS     |Info Message 0...15 Status                        |enum    |0-32768 - {value}                                                     |
+|FS      |Fault 0...31 Status                               |enum    |0-2147483648 - {value}                                                |
 
 </blockquote></details>
 
@@ -2426,8 +2246,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |4-7 - Reserved {value}                                                |
 |SVI     |Software Version Info                             |value   |0.0-4095.0 ↔ 0.0-4095.0                                               |
 |OHC     |Operation Hours Counter                           |value   |0.0-65535.0 ↔ 0.0-196605.0                                            |
-|IMS     |Info Message 0...15 Status                        |enum    |0-65535 - {value}                                                     |
-|FS      |Fault 0...31 Status                               |enum    |0-4294967295 - {value}                                                |
+|IMS     |Info Message 0...15 Status                        |enum    |0-32768 - {value}                                                     |
+|FS      |Fault 0...31 Status                               |enum    |0-2147483648 - {value}                                                |
 
 </blockquote></details>
 
@@ -2528,10 +2348,10 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |4-7 - Reserved {value}                                                |
 |SVI     |Software Version Info                             |value   |0.0-4095.0 ↔ 0.0-4095.0                                               |
 |OHC     |Operation Hours Counter                           |value   |0.0-65535.0 ↔ 0.0-196605.0                                            |
-|DIS     |Digital Input 0...15 Status                       |enum    |0-65535 - {value}                                                     |
-|DOS     |Digital Output 0...15 Status                      |enum    |0-65535 - {value}                                                     |
-|IMS     |Info Message 0...15 Status                        |enum    |0-65535 - {value}                                                     |
-|FS      |Fault 0...31 Status                               |enum    |0-4294967295 - {value}                                                |
+|DIS     |Digital Input 0...15 Status                       |enum    |0-32768 - {value}                                                     |
+|DOS     |Digital Output 0...15 Status                      |enum    |0-32768 - {value}                                                     |
+|IMS     |Info Message 0...15 Status                        |enum    |0-32768 - {value}                                                     |
+|FS      |Fault 0...31 Status                               |enum    |0-2147483648 - {value}                                                |
 
 </blockquote></details>
 
@@ -2640,10 +2460,10 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |        |                                                  |        |4-7 - Reserved {value}                                                |
 |SVI     |Software Version Info                             |value   |0.0-4095.0 ↔ 0.0-4095.0                                               |
 |OHC     |Operation Hours Counter                           |value   |0.0-65535.0 ↔ 0.0-196605.0                                            |
-|DIS     |Digital Input 0...15 Status                       |enum    |0-65535 - {value}                                                     |
-|DOS     |Digital Output 0...15 Status                      |enum    |0-65535 - {value}                                                     |
-|IMS     |Info Message 0...15 Status                        |enum    |0-65535 - {value}                                                     |
-|FS      |Fault 0...31 Status                               |enum    |0-4294967295 - {value}                                                |
+|DIS     |Digital Input 0...15 Status                       |enum    |0-32768 - {value}                                                     |
+|DOS     |Digital Output 0...15 Status                      |enum    |0-32768 - {value}                                                     |
+|IMS     |Info Message 0...15 Status                        |enum    |0-32768 - {value}                                                     |
+|FS      |Fault 0...31 Status                               |enum    |0-2147483648 - {value}                                                |
 
 </blockquote></details>
 
