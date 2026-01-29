@@ -188,7 +188,7 @@ class Packet(object):
             # At least for now, only support PACKET.RADIO_ERP1.
             raise ValueError('Packet type not supported by this function.')
 
-        if rorg not in [RORG.RPS, RORG.BS1, RORG.BS4, RORG.VLD]:
+        if rorg not in [RORG.RPS, RORG.BS1, RORG.BS4, RORG.VLD, RORG.MSC]:
             # At least for now, only support these RORGS.
             raise ValueError('RORG not supported by this function.')
 
@@ -211,7 +211,7 @@ class Packet(object):
         packet = Packet(packet_type, data=[], optional=[])
         packet.rorg = rorg
         packet.data = [packet.rorg]
-        # Select EEP at this point, so we know how many bits we're dealing with (for VLD).
+        # Select EEP at this point, so we know how many bits we're dealing with (for VLD and MSC).
         packet.select_eep(rorg_func, rorg_type, direction, command)
 
         # Initialize data depending on the profile.
@@ -251,7 +251,7 @@ class Packet(object):
         # Parse status from messages
         if self.rorg in [RORG.RPS, RORG.BS1, RORG.BS4]:
             self.status = self.data[-1]
-        if self.rorg == RORG.VLD:
+        if self.rorg in [RORG.VLD, RORG.MSC]:
             self.status = self.optional[-1]
 
         if self.rorg in [RORG.RPS, RORG.BS1, RORG.BS4]:
