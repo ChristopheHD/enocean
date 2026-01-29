@@ -266,3 +266,19 @@ def test_fails():
     ]))
     assert eep.find_profile(packet._bit_data, 0xD2, 0x01, 0x01) is not None
     assert eep.find_profile(packet._bit_data, 0xD2, 0x01, 0x01, command=-1) is None
+
+def test_unknown_enum():
+    ''' Tests RADIO message for EEP -profile 0xF6 0x02 0x02 with unknown enum value '''
+    # R1 is at offset 0, size 3. Values 0-3 are defined.
+    # We set bits to get raw_value 4.
+    from enocean.protocol.packet import RadioPacket
+    packet = RadioPacket.create(rorg=0xF6, rorg_func=0x02, rorg_type=0x02)
+    bits = packet._bit_data
+    bits[0] = True
+    bits[1] = False
+    bits[2] = False
+    packet._bit_data = bits
+
+    packet.parse_eep(0x02, 0x02)
+    assert packet.parsed['R1']['raw_value'] == 4
+    assert packet.parsed['R1']['value'] == '4'

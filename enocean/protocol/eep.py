@@ -93,11 +93,21 @@ class EEP(object):
         if value_desc is None:
             value_desc = self._get_rangeitem(source, raw_value)
 
+        if value_desc is None:
+            return {
+                source.get('shortcut'): {
+                    'description': source.get('description'),
+                    'unit': source.get('unit', ''),
+                    'value': str(raw_value),
+                    'raw_value': raw_value,
+                }
+            }
+
         return {
             source.get('shortcut'): {
                 'description': source.get('description'),
                 'unit': source.get('unit', ''),
-                'value': value_desc.get('description').format(value=raw_value),
+                'value': (value_desc.get('description') or str(raw_value)).format(value=raw_value),
                 'raw_value': raw_value,
             }
         }
