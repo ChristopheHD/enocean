@@ -1,3 +1,0 @@
-## 2025-01-29 - [EEP Shortcut Cache]
-**Learning:** `EEP.set_values` was performing an expensive XPath lookup (`.//*[@shortcut="..."]`) for every property during packet creation. This was a significant bottleneck in a library where packets are frequently created and sent. Using a dictionary-based cache for these shortcuts within the `EEP` class reduced the time for a creation+parse cycle by nearly 50%.
-**Action:** Always check for repeated XPath lookups in XML-driven logic, especially inside loops. Caching the elements in a dictionary using their `id()` or the element itself as a key provides a massive speedup.
