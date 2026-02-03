@@ -16,6 +16,8 @@ class EEP(object):
     def __init__(self):
         self.init_ok = False
         self.telegrams = {}
+        # Shortcut cache for set_values
+        self._shortcuts = {}
 
         eep_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'EEP.xml')
         try:
@@ -234,9 +236,18 @@ class EEP(object):
         if not self.init_ok or profile is None:
             return data, status
 
+        # Get shortcuts for this profile from cache, or index them if not present
+        profile_id = id(profile)
+        if profile_id not in self._shortcuts:
+            self._shortcuts[profile_id] = {
+                el.get('shortcut'): el
+                for el in profile.iter()
+                if el.get('shortcut')
+            }
+
         for shortcut, value in properties.items():
             # find the given property from EEP
-            target = profile.find('.//*[@shortcut="%s"]' % shortcut)
+            target = self._shortcuts[profile_id].get(shortcut)
             if target is None:
                 # TODO: Should we raise an error?
                 self.logger.warning('Cannot find data description for shortcut %s', shortcut)
