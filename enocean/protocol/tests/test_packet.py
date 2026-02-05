@@ -204,3 +204,14 @@ def test_event_packet():
     assert packet.event == EVENT_CODE.SA_RECLAIM_NOT_SUCCESFUL
     assert packet.event_data == []
     assert packet.optional == []
+
+
+def test_malformed_packet_robustness():
+    ''' Test that malformed packets (valid CRC but too short for subclass) don't crash the parser '''
+    # Radio ERP1 (type 1), data_len=1, opt_len=1. Passes CRC.
+    msg = bytearray([0x55, 0x00, 0x01, 0x01, 0x01, 0x79, 0x00, 0x00, 0x00])
+    status, remainder, packet = Packet.parse_msg(msg)
+    assert status == PARSE_RESULT.OK
+    assert packet.packet_type == PACKET.RADIO_ERP1
+    assert packet.data == [0x00]
+    assert packet.optional == [0x00]
