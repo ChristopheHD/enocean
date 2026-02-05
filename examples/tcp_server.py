@@ -12,7 +12,7 @@ except ImportError:
     import Queue as queue
 
 init_logging()
-communicator = TCPCommunicator()
+communicator = TCPCommunicator('127.0.0.1')
 communicator.start()
 while communicator.is_alive():
     try:

@@ -10,10 +10,11 @@ class TCPCommunicator(Communicator):
     ''' Socket communicator class for EnOcean radio '''
     logger = logging.getLogger('enocean.communicators.TCPCommunicator')
 
-    def __init__(self, host='', port=9637):
+    def __init__(self, host, port=9637):
         super(TCPCommunicator, self).__init__()
         self.host = host
         self.port = port
+        self.max_buffer_size = 10 * 1024 * 1024
 
     def run(self):
         self.logger.info('TCPCommunicator started')
@@ -27,7 +28,7 @@ class TCPCommunicator(Communicator):
                 (client, addr) = sock.accept()
             except socket.timeout:
                 continue
-            self.logger.debug('Client "%s" connected' % (addr))
+            self.logger.debug('Client "%s" connected' % (addr,))
             client.settimeout(0.5)
             while True and not self._stop_flag.is_set():
                 try:
@@ -35,6 +36,9 @@ class TCPCommunicator(Communicator):
                 except socket.timeout:
                     break
                 if not data:
+                    break
+                if len(self._buffer) + len(data) > self.max_buffer_size:
+                    self.logger.warning('Buffer size limit exceeded, dropping connection')
                     break
                 self._buffer.extend(bytearray(data))
             self.parse()
