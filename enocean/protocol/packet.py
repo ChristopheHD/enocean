@@ -28,17 +28,17 @@ class Packet(object):
 
         self.received = None
 
-        if not isinstance(data, list) or data is None:
+        if not isinstance(data, (list, bytearray, bytes)) or data is None:
             self.logger.warning('Replacing Packet.data with default value.')
             self.data = []
         else:
-            self.data = data
+            self.data = list(data)
 
-        if not isinstance(optional, list) or optional is None:
+        if not isinstance(optional, (list, bytearray, bytes)) or optional is None:
             self.logger.warning('Replacing Packet.optional with default value.')
             self.optional = []
         else:
-            self.optional = optional
+            self.optional = list(optional)
 
         self.status = 0
         self.parsed = OrderedDict({})
@@ -110,12 +110,19 @@ class Packet(object):
         '''
         # If the buffer doesn't contain 0x55 (start char)
         # the message isn't needed -> ignore
-        if 0x55 not in buf:
+        try:
+            if isinstance(buf, (bytearray, bytes)):
+                idx = buf.find(0x55)
+            else:
+                idx = buf.index(0x55)
+        except (ValueError, AttributeError):
+            return PARSE_RESULT.INCOMPLETE, [], None
+
+        if idx == -1:
             return PARSE_RESULT.INCOMPLETE, [], None
 
         # Valid buffer starts from 0x55
-        # Convert to list, as index -method isn't defined for bytearray
-        buf = [ord(x) if not isinstance(x, int) else x for x in buf[list(buf).index(0x55):]]
+        buf = buf[idx:]
         try:
             data_len = (buf[1] << 8) | buf[2]
             opt_len = buf[3]
@@ -149,18 +156,22 @@ class Packet(object):
             return PARSE_RESULT.CRC_MISMATCH, buf, None
 
         # If we got this far, everything went ok (?)
-        if packet_type == PACKET.RADIO_ERP1:
-            # Need to handle UTE Teach-in here, as it's a separate packet type...
-            if data[0] == RORG.UTE:
-                packet = UTETeachInPacket(packet_type, data, opt_data)
+        try:
+            if packet_type == PACKET.RADIO_ERP1:
+                # Need to handle UTE Teach-in here, as it's a separate packet type...
+                if data and data[0] == RORG.UTE:
+                    packet = UTETeachInPacket(packet_type, data, opt_data)
+                else:
+                    packet = RadioPacket(packet_type, data, opt_data)
+            elif packet_type == PACKET.RESPONSE:
+                packet = ResponsePacket(packet_type, data, opt_data)
+            elif packet_type == PACKET.EVENT:
+                packet = EventPacket(packet_type, data, opt_data)
             else:
-                packet = RadioPacket(packet_type, data, opt_data)
-        elif packet_type == PACKET.RESPONSE:
-            packet = ResponsePacket(packet_type, data, opt_data)
-        elif packet_type == PACKET.EVENT:
-            packet = EventPacket(packet_type, data, opt_data)
-        else:
-            packet = Packet(packet_type, data, opt_data)
+                packet = Packet(packet_type, data, opt_data)
+        except Exception as e:
+            Packet.logger.error('Exception while instantiating packet: %s', e)
+            return PARSE_RESULT.CRC_MISMATCH, buf, None
 
         return PARSE_RESULT.OK, buf, packet
 
@@ -249,9 +260,9 @@ class Packet(object):
     def parse(self):
         ''' Parse data from Packet '''
         # Parse status from messages
-        if self.rorg in [RORG.RPS, RORG.BS1, RORG.BS4]:
+        if self.rorg in [RORG.RPS, RORG.BS1, RORG.BS4] and self.data:
             self.status = self.data[-1]
-        if self.rorg in [RORG.VLD, RORG.MSC]:
+        if self.rorg in [RORG.VLD, RORG.MSC] and self.optional:
             self.status = self.optional[-1]
 
         if self.rorg in [RORG.RPS, RORG.BS1, RORG.BS4]:
@@ -326,18 +337,23 @@ class RadioPacket(Packet):
         return enocean.utils.to_hex_string(self.destination)
 
     def parse(self):
-        self.destination = self.optional[1:5]
-        self.dBm = -self.optional[5]
-        self.sender = self.data[-5:-1]
+        if len(self.optional) >= 6:
+            self.destination = self.optional[1:5]
+            self.dBm = -self.optional[5]
+        if len(self.data) >= 5:
+            self.sender = self.data[-5:-1]
         # Default to learn == True, as some devices don't have a learn button
         self.learn = True
+
+        if not self.data:
+            return super(RadioPacket, self).parse()
 
         self.rorg = self.data[0]
 
         # parse learn bit and FUNC/TYPE, if applicable
-        if self.rorg == RORG.BS1:
+        if self.rorg == RORG.BS1 and len(self.data) >= 2:
             self.learn = not self._bit_data[DB0.BIT_3]
-        if self.rorg == RORG.BS4:
+        if self.rorg == RORG.BS4 and len(self.data) >= 5:
             self.learn = not self._bit_data[DB0.BIT_3]
             if self.learn:
                 self.contains_eep = self._bit_data[DB0.BIT_7]
@@ -386,6 +402,8 @@ class UTETeachInPacket(RadioPacket):
 
     def parse(self):
         super(UTETeachInPacket, self).parse()
+        if len(self.data) < 8:
+            return self.parsed
         self.unidirectional = not self._bit_data[DB6.BIT_7]
         self.response_expected = not self._bit_data[DB6.BIT_6]
         self.request_type = enocean.utils.from_bitarray(self._bit_data[DB6.BIT_5:DB6.BIT_3])
@@ -420,8 +438,9 @@ class ResponsePacket(Packet):
     response_data = []
 
     def parse(self):
-        self.response = self.data[0]
-        self.response_data = self.data[1:]
+        if self.data:
+            self.response = self.data[0]
+            self.response_data = self.data[1:]
         return super(ResponsePacket, self).parse()
 
 
@@ -430,6 +449,7 @@ class EventPacket(Packet):
     event_data = []
 
     def parse(self):
-        self.event = self.data[0]
-        self.event_data = self.data[1:]
+        if self.data:
+            self.event = self.data[0]
+            self.event_data = self.data[1:]
         return super(EventPacket, self).parse()
