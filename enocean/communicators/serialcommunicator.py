@@ -15,8 +15,20 @@ class SerialCommunicator(Communicator):
         super(SerialCommunicator, self).__init__(callback)
         self.port = port
         # Initialize serial port
-        self.__ser = serial.Serial(self.port, 57600, timeout=0.1)
+        self.__ser = serial.Serial()
+        self.__ser.port = self.port
+        self.__ser.baudrate = 57600
+        self.__ser.bytesize = serial.EIGHTBITS,
+        self.__ser.parity = serial.PARITY_NONE,
+        self.__ser.stopbits = serial.STOPBITS_ONE,
+        self.__ser.timeout = 0.1
         self.__ser.dtr = False
+        self.__ser.rts = False
+        try:
+            self.__ser.open()
+        except serial.SerialException as e:
+            self.logger.error('Error opening serial port: %s', e)
+            self.stop()
 
     def _reset_serial_port(self):
         ''' Close and reopen serial port to recover from a stuck state '''
