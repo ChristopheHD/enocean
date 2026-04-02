@@ -16,6 +16,7 @@ class SerialCommunicator(Communicator):
         self.port = port
         # Initialize serial port
         self.__ser = serial.Serial(self.port, 57600, timeout=0.1)
+        self.__ser.dtr = False
 
     def _reset_serial_port(self):
         ''' Close and reopen serial port to recover from a stuck state '''
