@@ -359,6 +359,34 @@ class RadioPacket(Packet):
             return super(RadioPacket, self).parse()
 
         self.rorg = self.data[0]
+        self.cmd = None
+
+        # Extract VLD command if present
+        if self.rorg == RORG.VLD and len(self.data) > 1:
+            # Common VLD command is in bits 4-7 of the first data byte (offset 0 in data portion)
+            # This translates to bits 8-11 in the full _bit_data (which includes RORG byte)
+            self.cmd = enocean.utils.from_bitarray(self._bit_data[8:12])
+
+        # Extract MSC manufacturer and command
+        if self.rorg == RORG.MSC:
+            # MSC telegram: extract manufacturer and command bits
+            # Manufacturer ID is in bits 0:12 (12 bits) after RORG byte
+            if self.rorg_manufacturer is None:
+                self.rorg_manufacturer = enocean.utils.from_bitarray(
+                    self._bit_data[0:12]
+                )
+
+            # VentilAirSec-specific command extraction
+            manufacturer_hex = f"0x{self.rorg_manufacturer:03x}"
+            if manufacturer_hex in ("0xd1079", "0x079", "0x79", "0x121"):
+                # VentilAirSec: 4-bit command at bits 12:16 (right after manufacturer)
+                self.cmd = enocean.utils.from_bitarray(self._bit_data[12:16])
+            else:
+                # Fallback: use 8-bit command starting at bit 16
+                self.cmd = enocean.utils.from_bitarray(self._bit_data[16:24])
+
+            # For MSC, func and type should have been read from UTE Teach-In
+            self.contains_eep = False
 
         # parse learn bit and FUNC/TYPE, if applicable
         if self.rorg == RORG.BS1 and len(self.data) >= 2:
