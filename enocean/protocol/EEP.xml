@@ -3879,11 +3879,11 @@
           </enum>
           <enum description="Dim timer 2" shortcut="DT2" offset="16" size="4">
             <item description="Not used" value="0" />
-            <rangeitem description="Dim timer 2 0.5s" start="1" end="255" />
+            <rangeitem description="{value} × 0.5s" start="1" end="255" />
           </enum>
           <enum description="Dim timer 3" shortcut="DT3" offset="20" size="4">
             <item description="Not used" value="0" />
-            <rangeitem description="Dim timer 3 0.5s" start="1" end="255" />
+            <rangeitem description="{value} × 0.5s" start="1" end="255" />
           </enum>
           <enum description="User interface indication" shortcut="DN" offset="24" size="1">
             <item description="Day Operation" value="0" />
@@ -3901,7 +3901,7 @@
           </enum>
           <enum description="Dim timer 1" shortcut="DT1" offset="28" size="4">
             <item description="Not used" value="0" />
-            <rangeitem description="Dim timer 1 0.5s" start="1" end="255" />
+            <rangeitem description="{value} × 0.5s" start="1" end="255" />
           </enum>
         </data>
         <data command="3" bits="2">
@@ -4104,12 +4104,12 @@
           </enum>
           <enum description="Auto Off Timer" shortcut="AOT" offset="16" size="16">
             <item description="Timer deactivated " value="0" />
-            <rangeitem description="Timer to automatically set OFF output channel when it is set ON" start="1" end="65534" />
+            <rangeitem description="{value}s" start="1" end="65534" />
             <item description="Does not modify saved value" value="65535" />
           </enum>
           <enum description="Delay OFF Timer" shortcut="DOT" offset="32" size="16">
             <item description="Timer deactivated " value="0" />
-            <rangeitem description="Timer to automatically set OFF output channel when it is set ON" start="1" end="65534" />
+            <rangeitem description="{value}s" start="1" end="65534" />
             <item description="Does not modify saved value" value="65535" />
           </enum>
           <enum description="External Switch/Push Button" shortcut="EBM" offset="48" size="2">
@@ -4144,12 +4144,12 @@
           </enum>
           <enum description="Auto Off Timer" shortcut="AOT" offset="16" size="16">
             <item description="Timer deactivated " value="0" />
-            <rangeitem description="Timer to automatically set OFF output channel when it is set ON" start="1" end="65534" />
+            <rangeitem description="{value}s" start="1" end="65534" />
             <item description="Does not modify saved value" value="65535" />
           </enum>
           <enum description="Delay OFF Timer" shortcut="DOT" offset="32" size="16">
             <item description="Timer deactivated " value="0" />
-            <rangeitem description="Timer to automatically set OFF output channel when it is set ON" start="1" end="65534" />
+            <rangeitem description="{value}s" start="1" end="65534" />
             <item description="Does not modify saved value" value="65535" />
           </enum>
           <enum description="External Switch/Push Button" shortcut="EBM" offset="48" size="2">
