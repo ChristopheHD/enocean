@@ -70,7 +70,10 @@ class Communicator(threading.Thread):
             if status == PARSE_RESULT.OK and packet:
                 packet.received = datetime.datetime.now()
 
-                if isinstance(packet, UTETeachInPacket) and self.teach_in:
+                # Only answer if the device expects a response (UTE DB6.6 = 0).
+                # Some devices, e.g. LUNOS UNI-EO, send unidirectional requests
+                # with no response expected.
+                if isinstance(packet, UTETeachInPacket) and self.teach_in and packet.response_expected:
                     response_packet = packet.create_response_packet(self.base_id)
                     self.logger.info('Sending response to UTE teach-in.')
                     self.send(response_packet)
