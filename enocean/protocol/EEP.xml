@@ -4615,6 +4615,26 @@
               <max>63.0</max>
             </scale>
           </value>
+          <value description="Indoor Air Temperature" shortcut="INT" offset="54" size="7" unit="°C">
+            <range>
+              <min>0</min>
+              <max>127</max>
+            </range>
+            <scale>
+              <min>-64.0</min>
+              <max>63.0</max>
+            </scale>
+          </value>
+          <value description="Exhaust Air Temperature" shortcut="EXHT" offset="61" size="7" unit="°C">
+            <range>
+              <min>0</min>
+              <max>127</max>
+            </range>
+            <scale>
+              <min>-64.0</min>
+              <max>63.0</max>
+            </scale>
+          </value>
           <value description="Supply Air Fan Air Flow Rate" shortcut="SPLYFF" offset="68" size="10" unit="m3/h">
             <range>
               <min>0</min>
