@@ -4520,6 +4520,12 @@
             <item description="Select previous operation mode (edge-trigger)" value="2" />
             <item description="Reserved" value="3" />
           </enum>
+          <enum description="Heat Exchanger Bypass Control" shortcut="HBC" offset="10" size="2">
+            <item description="No action" value="0" />
+            <item description="Close bypass (edge-trigger)" value="1" />
+            <item description="Open bypass (edge-trigger)" value="2" />
+            <item description="Reserved" value="3" />
+          </enum>
           <enum description="Timer Operation Mode Control" shortcut="TOMC" offset="16" size="1">
             <item description="No action" value="0" />
             <item description="Start timer operation mode (edge-trigger)" value="1" />
@@ -4557,6 +4563,10 @@
             <item description="Supply air only" value="13" />
             <item description="Exhaust air only" value="14" />
             <item description="Reserved" value="15" />
+          </enum>
+          <enum description="Heat Exchanger Bypass Status" shortcut="HBS" offset="13" size="1">
+            <item description="Bypass closed (heat-recovery active)" value="0" />
+            <item description="Bypass opened (heat-recovery inactive)" value="1" />
           </enum>
           <enum description="Supply Air Flap Position" shortcut="SFP" offset="14" size="1">
             <item description="Supply air flap closed" value="0" />
