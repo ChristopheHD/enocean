@@ -282,3 +282,25 @@ def test_unknown_enum():
     packet.parse_eep(0x02, 0x02)
     assert packet.parsed['R1']['raw_value'] == 4
     assert packet.parsed['R1']['value'] == '4'
+
+
+def test_d2_50_00_bypass():
+    ''' Tests heat exchanger bypass control (HBC) and status (HBS) of EEP D2-50-00 '''
+    from enocean.protocol.packet import RadioPacket
+    from enocean.protocol.constants import PACKET
+
+    # Ventilation control message: open bypass, keep current ventilation level
+    packet = RadioPacket.create(RORG.VLD, 0x50, 0x00, command=1)
+    packet.set_eep({'MT': 1, 'DOMC': 15, 'OMC': 0, 'HBC': 2, 'TOMC': 0, 'COT': 127, 'HT': 127, 'AQT': 127})
+    assert packet.data[1:3] == [0x2F, 0x20]
+    packet.set_eep({'HBC': 1})
+    assert packet.data[1:3] == [0x2F, 0x10]
+
+    # Ventilation basic status message with the bypass opened (bit 13)
+    data = [0xD2, 0x41, 0x04, 0x00, 0x30, 0x00, 0x81, 0x02, 0xBD, 0x70, 0x04, 0x01, 0x00, 0x00, 0x00,
+            0x05, 0x26, 0xA0, 0x6E, 0x00]
+    raw = Packet(PACKET.RADIO_ERP1, data=data, optional=[0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0x4A, 0x00])
+    status, buf, packet = Packet.parse_msg(bytearray(raw.build()))
+    packet.parse_eep(0x50, 0x00, None, 2)
+    assert packet.parsed['HBS']['raw_value'] == 1
+    assert packet.parsed['HBS']['value'] == 'Bypass opened (heat-recovery inactive)'
