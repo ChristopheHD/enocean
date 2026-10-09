@@ -8,6 +8,9 @@ from enocean.protocol import crc8
 from enocean.protocol.eep import EEP
 from enocean.protocol.constants import PACKET, RORG, PARSE_RESULT, DB0, DB2, DB3, DB4, DB6
 
+# Global storage for chained telegrams
+_CHAINED_STORAGE = {}
+
 
 class Packet(object):
     '''
@@ -161,6 +164,8 @@ class Packet(object):
                 # Need to handle UTE Teach-in here, as it's a separate packet type...
                 if data and data[0] == RORG.UTE:
                     packet = UTETeachInPacket(packet_type, data, opt_data)
+                elif data and (data[0] == RORG.CHAINED or data[0] == RORG.CHAINED_VENTILAIRSEC):
+                    packet = ChainedPacket(packet_type, data, opt_data)
                 else:
                     packet = RadioPacket(packet_type, data, opt_data)
             elif packet_type == PACKET.RESPONSE:
@@ -172,6 +177,11 @@ class Packet(object):
         except Exception as e:
             Packet.logger.error('Exception while instantiating packet: %s', e)
             return PARSE_RESULT.CRC_MISMATCH, buf, None
+
+        # Filter out incomplete CHAINED packets (parsed OrderedDict is empty)
+        # They should not be propagated until they are fully reassembled into complete MSC packets
+        if isinstance(packet, ChainedPacket) and not packet.parsed:
+            return PARSE_RESULT.OK, buf, None
 
         return PARSE_RESULT.OK, buf, packet
 
@@ -349,6 +359,34 @@ class RadioPacket(Packet):
             return super(RadioPacket, self).parse()
 
         self.rorg = self.data[0]
+        self.cmd = None
+
+        # Extract VLD command if present
+        if self.rorg == RORG.VLD and len(self.data) > 1:
+            # Common VLD command is in bits 4-7 of the first data byte (offset 0 in data portion)
+            # This translates to bits 8-11 in the full _bit_data (which includes RORG byte)
+            self.cmd = enocean.utils.from_bitarray(self._bit_data[8:12])
+
+        # Extract MSC manufacturer and command
+        if self.rorg == RORG.MSC:
+            # MSC telegram: extract manufacturer and command bits
+            # Manufacturer ID is in bits 0:12 (12 bits) after RORG byte
+            if self.rorg_manufacturer is None:
+                self.rorg_manufacturer = enocean.utils.from_bitarray(
+                    self._bit_data[0:12]
+                )
+
+            # VentilAirSec-specific command extraction
+            manufacturer_hex = f"0x{self.rorg_manufacturer:03x}"
+            if manufacturer_hex in ("0xd1079", "0x079", "0x79", "0x121"):
+                # VentilAirSec: 4-bit command at bits 12:16 (right after manufacturer)
+                self.cmd = enocean.utils.from_bitarray(self._bit_data[12:16])
+            else:
+                # Fallback: use 8-bit command starting at bit 16
+                self.cmd = enocean.utils.from_bitarray(self._bit_data[16:24])
+
+            # For MSC, func and type should have been read from UTE Teach-In
+            self.contains_eep = False
 
         # parse learn bit and FUNC/TYPE, if applicable
         if self.rorg == RORG.BS1 and len(self.data) >= 2:
@@ -453,3 +491,290 @@ class EventPacket(Packet):
             self.event = self.data[0]
             self.event_data = self.data[1:]
         return super(EventPacket, self).parse()
+class ChainedPacket(RadioPacket):
+    """Handles CHAINED telegrams (RORG 0xC8 or 0x40) for multi-part messages.
+
+    Ventilairsec MSC devices use chained telegrams (proprietary 0x40) to send long
+    messages that don't fit in a single EnOcean frame. Standard EnOcean also uses
+    0xC8 for chained messages. This class reconstructs the complete message from
+    multiple chained frames for both formats.
+    """
+
+    def parse(self):
+        """Parse chained telegram structure."""
+        # Extract basic RadioPacket fields
+        self.destination = self.optional[1:5]
+        self.dBm = -self.optional[5]
+        self.sender = self.data[-5:-1]
+        self.learn = True
+
+        self.rorg = self.data[0]
+
+        # Ventilairsec proprietary CHAINED (0x40) uses an alternate
+        # framing where continuation payload bytes start at index 2 and
+        # the total length is encoded as concatenated decimal strings
+        # in bytes 2..3 of the first frame. Use the user-supplied
+        # reassembly algorithm for RORG 0x40.
+        if self.rorg == RORG.CHAINED_VENTILAIRSEC:
+            # Use same bit mapping as standard CHAINED packets:
+            # Bits 4-7: sequence, Bits 0-3: index
+            byte1 = self.data[1]
+            seq = (byte1 >> 4) & 0x0F
+            idx = byte1 & 0x0F
+
+            sender_hex = enocean.utils.to_hex_string(self.sender).replace(":", "")
+            key = f"{sender_hex}.{seq}"
+
+            if idx == 0:
+                # First frame: total length is stored in bytes 2-3 as
+                # concatenated decimal strings (e.g., 0x00 0x11 = "0" + "17" = "017" = 17)
+                lendata = int(str(self.data[2]) + str(self.data[3]))
+
+                self.logger.info(
+                    "Chained telegram: First message (seq=%d), total_length=%d bytes",
+                    seq,
+                    lendata,
+                )
+
+                first_data = self.data[4:-5]
+                _CHAINED_STORAGE[key] = {
+                    "seq": seq,
+                    "total_len": lendata,
+                    "data": list(first_data),
+                    "sender": self.sender,
+                    "optional": self.optional,
+                }
+
+                self.parsed = OrderedDict()
+                return self.parsed
+
+            # continuation
+            self.logger.debug(
+                "Chained telegram: Continuation (seq=%d, idx=%d)", seq, idx
+            )
+
+            if key not in _CHAINED_STORAGE:
+                self.logger.debug(
+                    "No chain found for %s (missing first frame)",
+                    key,
+                )
+                return self.parsed
+
+            # For VENTILAIRSEC continuation frames, payload starts at index 2
+            # (bytes 2-3 are part of the payload, unlike in the first frame
+            # where they encode the total length)
+            cont_data = self.data[2:-5]
+            _CHAINED_STORAGE[key]["data"].extend(cont_data)
+
+            current_len = len(_CHAINED_STORAGE[key]["data"])
+            expected_len = _CHAINED_STORAGE[key]["total_len"]
+
+            self.logger.debug(
+                "Chained progress (seq=%d, idx=%d): %d/%d bytes, new_chunk=%s",
+                seq,
+                idx,
+                current_len,
+                expected_len,
+                bytes(cont_data).hex(),
+            )
+
+            self.parsed = OrderedDict()
+
+            if current_len >= expected_len:
+                complete_data = _CHAINED_STORAGE[key]["data"][:expected_len]
+
+                # Reassemble as MSC packet: complete_data already contains RORG byte (0xD1)
+                # Ventilairsec chained telegrams include the full MSC structure
+                msc_data = complete_data + _CHAINED_STORAGE[key]["sender"] + [0]
+                msc_packet = RadioPacket(
+                    self.packet_type, msc_data, _CHAINED_STORAGE[key]["optional"]
+                )
+
+                del _CHAINED_STORAGE[key]
+                msc_packet.parse()
+
+                self.data = msc_packet.data
+                self.optional = msc_packet.optional
+                self.rorg = msc_packet.rorg
+                self.rorg_func = msc_packet.rorg_func
+                self.rorg_type = msc_packet.rorg_type
+                self.rorg_manufacturer = msc_packet.rorg_manufacturer
+                self.contains_eep = msc_packet.contains_eep
+                self.learn = msc_packet.learn
+                self.cmd = msc_packet.cmd
+                self.parsed = msc_packet.parsed
+
+                # Mark as reconstructed so downstream processing knows this was reassembled
+                # Store reconstruction info that will help with later parsing attempts
+                if not self.parsed:
+                    # MSC packets don't auto-parse EEP (contains_eep=False)
+                    # Mark as reconstructed so dongle can attempt profile-based parsing
+                    self.parsed["reconstructed"] = {
+                        "raw_value": True,
+                        "rorg_manufacturer": self.rorg_manufacturer,
+                        "cmd": self.cmd,
+                    }
+
+                self.logger.debug(
+                    "Reconstructed MSC packet: rorg=0x%02X manufacturer=0x%03X cmd=%s parsed=%s",
+                    self.rorg,
+                    self.rorg_manufacturer if self.rorg_manufacturer else 0,
+                    self.cmd,
+                    bool(self.parsed),
+                )
+
+                return self.parsed
+
+            return self.parsed
+
+        if len(self.data) < 8:
+            self.logger.error("Chained packet too short: %d bytes", len(self.data))
+            return self.parsed
+
+        # Extract sequence and index from byte 1
+        # Bits 4-7: sequence number, Bits 0-3: index
+        byte1 = self.data[1]
+        seq = (byte1 >> 4) & 0x0F
+        idx = byte1 & 0x0F
+
+        # Total length from bytes 2-3 (only valid in first frame, idx=0)
+        # In continuation frames, bytes 2-3 may contain other data
+        total_len = (self.data[2] << 8) | self.data[3] if idx == 0 else 0
+
+        # Create storage key
+        sender_hex = enocean.utils.to_hex_string(self.sender).replace(":", "")
+        chain_key = f"{sender_hex}.{seq}"
+
+        self.logger.debug(
+            "ChainedPacket.parse() - sender=%s, RORG=0x%02X, seq=%d, idx=%d, total_len=%d, data_len=%d",
+            sender_hex,
+            self.rorg,
+            seq,
+            idx,
+            total_len,
+            len(self.data),
+        )
+
+        if idx == 0:
+            # First message of chain - store metadata
+            self.logger.info(
+                "Chained telegram: First message (seq=%d), total_length=%d bytes",
+                seq,
+                total_len,
+            )
+
+            # Extract first chunk of data (bytes 4 to -5, excluding sender and status)
+            first_data = self.data[4:-5]
+
+            _CHAINED_STORAGE[chain_key] = {
+                "seq": seq,
+                "total_len": total_len,
+                "data": first_data,
+                "sender": self.sender,
+                "optional": self.optional,
+            }
+
+            # Mark as unparsed since this is an incomplete chain
+            # Keep as OrderedDict (empty) to indicate incompleteness
+            # The parsed OrderedDict is only populated when reassembly is complete
+            self.parsed = OrderedDict()
+            self.logger.debug(
+                "ChainedPacket incomplete - not propagating to listeners (waiting for %d more bytes)",
+                total_len - len(first_data),
+            )
+        else:
+            # Continuation of chain
+            self.logger.debug(
+                "Chained telegram: Continuation (seq=%d, idx=%d)", seq, idx
+            )
+
+            if chain_key not in _CHAINED_STORAGE:
+                self.logger.warning(
+                    "Chained continuation without first message (chain_key=%s). Available keys: %s",
+                    chain_key,
+                    list(_CHAINED_STORAGE.keys()),
+                )
+                return self.parsed
+
+            # Extract continuation data (bytes 2 to -5, including bytes 2-3 which are payload)
+            cont_data = self.data[2:-5]
+
+            _CHAINED_STORAGE[chain_key]["data"].extend(cont_data)
+
+            current_len = len(_CHAINED_STORAGE[chain_key]["data"])
+            expected_len = _CHAINED_STORAGE[chain_key]["total_len"]
+
+            self.logger.debug(
+                "Chained progress (seq=%d, idx=%d): %d/%d bytes, new_chunk=%s",
+                seq,
+                idx,
+                current_len,
+                expected_len,
+                bytes(cont_data).hex(),
+            )
+
+            # Mark as unparsed - will only be parsed when complete
+            # Keep as OrderedDict (empty) to indicate incompleteness
+            self.parsed = OrderedDict()
+
+            # Check if chain is complete
+            if current_len >= expected_len:
+                self.logger.debug(
+                    "Chained telegram complete: Reassembling MSC packet from %d bytes",
+                    expected_len,
+                )
+
+                # Get complete data and truncate to expected length
+                complete_data = _CHAINED_STORAGE[chain_key]["data"][:expected_len]
+
+                # Reassemble as MSC packet: [RORG] + complete_data + sender + status
+                # RORG for MSC is 0xD1
+                msc_data = (
+                    [0xD1] + complete_data + _CHAINED_STORAGE[chain_key]["sender"] + [0]
+                )
+
+                # Create a complete MSC packet
+                msc_packet = RadioPacket(
+                    self.packet_type,
+                    msc_data,
+                    _CHAINED_STORAGE[chain_key]["optional"],
+                )
+
+                # Clean up storage
+                del _CHAINED_STORAGE[chain_key]
+
+                # Parse the MSC packet
+                msc_packet.parse()
+
+                # Copy the reassembled packet attributes to self
+                self.data = msc_packet.data
+                self.optional = msc_packet.optional
+                self.rorg = msc_packet.rorg
+                self.rorg_func = msc_packet.rorg_func
+                self.rorg_type = msc_packet.rorg_type
+                self.rorg_manufacturer = msc_packet.rorg_manufacturer
+                self.contains_eep = msc_packet.contains_eep
+                self.learn = msc_packet.learn
+                self.cmd = msc_packet.cmd
+                self.parsed = msc_packet.parsed
+
+                # Mark as reconstructed so downstream processing knows this was reassembled
+                # Store reconstruction info that will help with later parsing attempts
+                if not self.parsed:
+                    # MSC packets don't auto-parse EEP (contains_eep=False)
+                    # Mark as reconstructed so dongle can attempt profile-based parsing
+                    self.parsed["reconstructed"] = {
+                        "raw_value": True,
+                        "rorg_manufacturer": self.rorg_manufacturer,
+                        "cmd": self.cmd,
+                    }
+
+                self.logger.info(
+                    "MSC packet reconstructed successfully: RORG=0x%02X, FUNC=0x%02X, TYPE=0x%02X, Manufacturer=0x%03X",
+                    self.rorg,
+                    self.rorg_func if self.rorg_func is not None else 0,
+                    self.rorg_type if self.rorg_type is not None else 0,
+                    self.rorg_manufacturer if self.rorg_manufacturer is not None else 0,
+                )
+
+        return self.parsed
