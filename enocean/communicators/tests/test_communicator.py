@@ -120,3 +120,22 @@ def test_ute_teach_in_response():
     com.parse()
     assert com.transmit.qsize() == 0
     assert com.receive.qsize() == 1
+
+
+def test_ignore_own_packets():
+    ''' Packets sent from our own Base ID (e.g. repeated by a repeater) are not processed '''
+    # The UTE teach-in request (sender 05:26:A0:6E) would be answered
+    com = Communicator()
+    com._base_id = [0xDE, 0xAD, 0xBE, 0xEF]
+    com._buffer.extend(_ute_teach_in_packet(0x80))
+    com.parse()
+    assert com.transmit.qsize() == 1
+    assert com.receive.qsize() == 1
+
+    # The same request sent from our own Base ID is neither answered nor queued
+    com = Communicator()
+    com._base_id = [0x05, 0x26, 0xA0, 0x6E]
+    com._buffer.extend(_ute_teach_in_packet(0x80))
+    com.parse()
+    assert com.transmit.qsize() == 0
+    assert com.receive.qsize() == 0
