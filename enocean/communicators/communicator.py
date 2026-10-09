@@ -8,7 +8,7 @@ try:
     import queue
 except ImportError:
     import Queue as queue
-from enocean.protocol.packet import Packet, UTETeachInPacket
+from enocean.protocol.packet import Packet, RadioPacket, UTETeachInPacket
 from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
 
 
@@ -69,6 +69,14 @@ class Communicator(threading.Thread):
             # If message is OK, add it to receive queue or send to the callback method
             if status == PARSE_RESULT.OK and packet:
                 packet.received = datetime.datetime.now()
+
+                # Ignore radio packets sent from our own Base ID, e.g. our own packets
+                # repeated by a repeater. Otherwise we would react to them, e.g. answer our
+                # own UTE teach-in response again and again.
+                if (isinstance(packet, RadioPacket) and self._base_id is not None
+                        and list(packet.sender) == list(self._base_id)):
+                    self.logger.debug('Ignoring packet sent from own Base ID.')
+                    continue
 
                 # Only answer if the device expects a response (UTE DB6.6 = 0).
                 # Some devices, e.g. LUNOS UNI-EO, send unidirectional requests
