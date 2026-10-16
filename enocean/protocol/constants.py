@@ -52,6 +52,8 @@ class RORG(IntEnum):
     BS4 = 0xA5
     VLD = 0xD2
     MSC = 0xD1
+    CHAINED = 0xC8
+    CHAINED_VENTILAIRSEC = 0x40  # Proprietary chained telegram format for VentilAirSec
     ADT = 0xA6
     SM_LRN_REQ = 0xC6
     SM_LRN_ANS = 0xC7

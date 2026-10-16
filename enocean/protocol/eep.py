@@ -4,6 +4,7 @@ import os
 import logging
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+from threading import Lock
 
 import enocean.utils
 # Left as a helper
@@ -262,3 +263,30 @@ class EEP(object):
                 status = self._set_boolean(target, value, status)
 
         return data, status
+
+
+# Singleton instance for EEP
+_eep_instance = None
+_eep_lock = Lock()
+
+
+def get_eep():
+    """Return a cached EEP instance (singleton).
+
+    Callers should use this instead of creating multiple ``EEP()`` objects
+    to avoid repeatedly opening and parsing the bundled EEP.xml file.
+    """
+    global _eep_instance
+    if _eep_instance is None:
+        with _eep_lock:
+            if _eep_instance is None:
+                _eep_instance = EEP()
+    return _eep_instance
+
+
+def reload_eep():
+    """Force reload the EEP XML by recreating the singleton and return it."""
+    global _eep_instance
+    with _eep_lock:
+        _eep_instance = EEP()
+        return _eep_instance
