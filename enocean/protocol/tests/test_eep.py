@@ -304,3 +304,13 @@ def test_d2_50_00_bypass():
     packet.parse_eep(0x50, 0x00, None, 2)
     assert packet.parsed['HBS']['raw_value'] == 1
     assert packet.parsed['HBS']['value'] == 'Bypass opened (heat-recovery inactive)'
+
+
+def test_set_value_rounds_to_nearest_raw_value():
+    ''' Tests that setting a scaled value gives the raw value that decodes back to it '''
+    from enocean.protocol.packet import RadioPacket
+
+    # A5-02-05: raw 85 is 26.7 °C, (26.7 - 0) * (0 - 255) / (40 - 0) + 255 = 84.79
+    packet = RadioPacket.create(RORG.BS4, 0x02, 0x05, TMP=26.7)
+    assert packet.parsed['TMP']['raw_value'] == 85
+    assert round(packet.parsed['TMP']['value'], 1) == 26.7

@@ -137,8 +137,9 @@ class EEP(object):
         scl_min = float(scl.find('min').text)
         scl_max = float(scl.find('max').text)
         raw_value = (value - scl_min) * (rng_max - rng_min) / (scl_max - scl_min) + rng_min
-        # store value in bitfield
-        return self._set_raw(target, int(raw_value), bitarray)
+        # store value in bitfield, rounded to the nearest raw value as truncating
+        # would turn floating point errors into an off-by-one raw value
+        return self._set_raw(target, int(round(raw_value)), bitarray)
 
     def _set_enum(self, target, value, bitarray):
         ''' set given enum value (by string or integer value) to target field in bitarray '''
