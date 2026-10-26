@@ -4750,6 +4750,7 @@
           <item description="Time and date" value="3" />
           <item description="Request and status" value="8" />
           <item description="Heater parameters" value="9" />
+          <item description="Value of air, hygro., pressure and temp." value="12" />
         </command>
         <data command="0" bits="3">
           <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
@@ -5113,6 +5114,51 @@
             <scale>
               <min>0</min>
               <max>1024</max>
+            </scale>
+          </value>
+        </data>
+        <data command="12" bits="6">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Value of air, hygro., pressure and temp." value="12" />
+          </enum>
+          <value description="Air Moving" shortcut="AMV" offset="4" size="4" unit="m/s">
+            <range>
+              <min>1</min>
+              <max>15</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>15</max>
+            </scale>
+          </value>
+          <value description="Pressure Value" shortcut="PRV" offset="15" size="10" unit="hPa">
+            <range>
+              <min>1</min>
+              <max>1023</max>
+            </range>
+            <scale>
+              <min>500</min>
+              <max>1150</max>
+            </scale>
+          </value>
+          <value description="Hygrometry Value" shortcut="HYV" offset="25" size="8" unit="%">
+            <range>
+              <min>1</min>
+              <max>200</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>100</max>
+            </scale>
+          </value>
+          <value description="Internal Temperature" shortcut="INT" offset="33" size="11" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
             </scale>
           </value>
         </data>

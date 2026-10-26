@@ -149,3 +149,22 @@ def test_heater_error_flags():
     parsed = parse(payload)
     assert parsed['ERF']['raw_value'] == 0b101
     assert parsed['ERF']['value'] == 0b101
+
+
+def test_air_hygrometry_pressure_temperature():
+    # Sent by EQUATION Sorali heaters along with their status, although not listed for type 0x00:
+    # INT is 11 bits at offset 33, 19.9 °C = 199
+    payload = [0xC0, 0x00, 0x00, 0x00, 0x0C, 0x70]
+    parsed = parse(payload)
+    assert parsed['MID']['value'] == 'Value of air, hygro., pressure and temp.'
+    assert round(parsed['INT']['value'], 1) == 19.9
+    assert [parsed[field]['raw_value'] for field in ('AMV', 'PRV', 'HYV')] == [0, 0, 0]
+
+    # 2 m/s air moving, pressure 1013 hPa (spec range 1...1023 for 500...1150 hPa), 45 % (90), 21.5 °C (215)
+    bits = '1100' + '0010' + '0' * 7 + format(808, '010b') + format(90, '08b') + format(215, '011b') + '0000'
+    payload = [int(bits[i:i + 8], 2) for i in range(0, 48, 8)]
+    parsed = parse(payload)
+    assert parsed['AMV']['raw_value'] == 2
+    assert round(parsed['PRV']['value']) == 1013
+    assert round(parsed['HYV']['value']) == 45
+    assert round(parsed['INT']['value'], 1) == 21.5
