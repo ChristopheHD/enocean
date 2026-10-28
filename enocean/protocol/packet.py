@@ -262,7 +262,12 @@ class Packet(object):
 
         # Parse the built packet, so it corresponds to the received packages
         # For example, stuff like RadioPacket.learn should be set.
-        packet = Packet.parse_msg(packet.build())[2]
+        parse_status, _, parsed_packet = Packet.parse_msg(packet.build())
+        if parsed_packet is None:
+            raise RuntimeError(
+                'Failed to parse packet after building it (status: %s).' % parse_status
+            )
+        packet = parsed_packet
         packet.rorg = rorg
         packet.parse_eep(rorg_func, rorg_type, direction, command)
         return packet
@@ -361,11 +366,9 @@ class RadioPacket(Packet):
         self.rorg = self.data[0]
         self.cmd = None
 
-        # Extract VLD command if present
-        if self.rorg == RORG.VLD and len(self.data) > 1:
-            # Common VLD command is in bits 4-7 of the first data byte (offset 0 in data portion)
-            # This translates to bits 8-11 in the full _bit_data (which includes RORG byte)
-            self.cmd = enocean.utils.from_bitarray(self._bit_data[8:12])
+        # Extract VLD command if the first payload byte is present
+        if self.rorg == RORG.VLD and len(self._bit_data) >= 8:
+            self.cmd = enocean.utils.from_bitarray(self._bit_data[4:8])
 
         # Extract MSC manufacturer and command
         if self.rorg == RORG.MSC:
