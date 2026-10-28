@@ -3,7 +3,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 from pytest import raises
 
 from enocean.protocol.packet import Packet, RadioPacket
-from enocean.protocol.constants import PACKET, RORG
+from enocean.protocol.constants import PACKET, PARSE_RESULT, RORG
 from enocean.decorators import timing
 
 
@@ -375,3 +375,14 @@ def test_fails():
         assert False
     except ValueError:
         assert True
+
+
+def test_packet_create_raises_when_built_packet_cannot_be_parsed(monkeypatch):
+    monkeypatch.setattr(
+        Packet,
+        'parse_msg',
+        staticmethod(lambda buf: (PARSE_RESULT.CRC_MISMATCH, [], None))
+    )
+
+    with raises(RuntimeError, match='Failed to parse packet after building it'):
+        Packet.create(PACKET.RADIO_ERP1, RORG.BS1, 0x00, 0x01, CO='open')

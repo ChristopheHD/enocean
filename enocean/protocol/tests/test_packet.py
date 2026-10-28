@@ -215,3 +215,19 @@ def test_malformed_packet_robustness():
     assert packet.packet_type == PACKET.RADIO_ERP1
     assert packet.data == [0x00]
     assert packet.optional == [0x00]
+
+
+def test_vld_command_extraction():
+    sender = [0xDE, 0xAD, 0xBE, 0xEF]
+    optional = [0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0x40, 0x00]
+
+    for payload, expected_cmd in (([0x02], 0x02), ([], None)):
+        packet = Packet(
+            PACKET.RADIO_ERP1,
+            data=[0xD2] + payload + sender + [0x00],
+            optional=optional
+        )
+        status, _, parsed_packet = Packet.parse_msg(packet.build())
+
+        assert status == PARSE_RESULT.OK
+        assert parsed_packet.cmd == expected_cmd
