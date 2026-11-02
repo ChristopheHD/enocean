@@ -6,7 +6,8 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import pytest
 
 from enocean.protocol import security
-from enocean.protocol.constants import RORG
+from enocean.protocol.constants import PACKET, RORG
+from enocean.protocol.packet import Packet, RadioPacket
 
 PK_A41 = bytes.fromhex("456E4F6365616E20476D62482E313300")
 PK_A43 = bytes.fromhex("E50880CF67790D5D66AA7F3B7AD77A3F")
@@ -147,3 +148,15 @@ def test_parse_teach_in_rejects_psk():
 def test_generated_keys_are_random():
     assert len(security.generate_key()) == 16
     assert security.generate_key() != security.generate_key()
+
+
+def test_teach_in_key_is_not_printed():
+    data = security.build_teach_in(bytes.fromhex("A1B2C3D4E5F60718293A4B5C6D7E8F90"))[0]
+    sent = RadioPacket(PACKET.RADIO_ERP1, data=[RORG.SEC_TI] + list(data) + [0x01, 0x02, 0x03, 0x04, 0x00],
+                       optional=[0x03, 0x05, 0x06, 0x07, 0x08, 0x2D, 0x00])
+    _, _, received = Packet.parse_msg(bytearray(sent.build()))
+    for packet in (sent, received):
+        assert str(packet) == '01:02:03:04->05:06:07:08 (-45 dBm): secure teach-in'
+    other = RadioPacket(PACKET.RADIO_ERP1, data=[RORG.VLD, 0x08, 0x01, 0x02, 0x03, 0x04, 0x00],
+                        optional=[0x03, 0x05, 0x06, 0x07, 0x08, 0x2D, 0x00])
+    assert "'0x8'" in str(other)

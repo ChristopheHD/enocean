@@ -326,6 +326,9 @@ class RadioPacket(Packet):
     contains_eep = False
 
     def __str__(self):
+        if self.rorg == RORG.SEC_TI:
+            # The data of a secure teach-in contains a key, which must not end up in logs
+            return '%s->%s (%d dBm): secure teach-in' % (self.sender_hex, self.destination_hex, self.dBm)
         packet_str = super(RadioPacket, self).__str__()
         return '%s->%s (%d dBm): %s' % (self.sender_hex, self.destination_hex, self.dBm, packet_str)
 
