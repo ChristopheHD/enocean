@@ -3,6 +3,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import logging
 import datetime
 import itertools
+import time
 
 import threading
 try:
@@ -25,11 +26,17 @@ class Communicator(threading.Thread):
     tells what happened to them.
 
     Radio telegrams too long for a single radio telegram are sent as chained data messages (R-ORG 0x40).
+
+    A packet is sent once the transmitter has answered the previous one, as ESP3 requires: packets sent in a burst
+    are lost by the transmitter.
     '''
     logger = logging.getLogger('enocean.communicators.Communicator')
 
     # R-ORGs never encrypted when sent: already secure, chained or teach-in telegrams
     UNENCRYPTED_RORGS = (RORG.SEC, RORG.SEC_ENCAPS, RORG.SEC_TI, RORG.CHAINED, RORG.CHAINED_VENTILAIRSEC, RORG.UTE)
+
+    # Time to wait for the response of the transmitter to a packet before sending the next one, in seconds
+    RESPONSE_TIMEOUT = 0.5
 
     def __init__(self, callback=None, teach_in=True, secure_devices=None):
         super(Communicator, self).__init__()
@@ -51,13 +58,21 @@ class Communicator(threading.Thread):
         self.secure_devices = secure_devices
         # Sequence numbers of chained data messages, which must change between successive chains
         self._chain_seqs = itertools.cycle((1, 2, 3))
+        # Time until which the response to the last packet sent is awaited, None once received
+        self._response_deadline = None
 
     def _get_from_send_queue(self):
-        ''' Get message from send queue, if one exists '''
+        ''' Get message from send queue, if one exists and the response to the previous one was received '''
+        if self._response_deadline is not None:
+            if time.monotonic() < self._response_deadline:
+                return None
+            self.logger.warning('No response from the transmitter to the last packet sent')
+            self._response_deadline = None
         try:
             packet = self.transmit.get(block=False)
             self.logger.info('Sending packet')
             self.logger.debug(packet)
+            self._response_deadline = time.monotonic() + self.RESPONSE_TIMEOUT
             return packet
         except queue.Empty:
             pass
@@ -140,6 +155,9 @@ class Communicator(threading.Thread):
             # If message is OK, add it to receive queue or send to the callback method
             if status == PARSE_RESULT.OK and packet:
                 packet.received = datetime.datetime.now()
+
+                if packet.packet_type == PACKET.RESPONSE:
+                    self._response_deadline = None
 
                 # Ignore radio packets sent from our own Base ID, e.g. our own packets
                 # repeated by a repeater. Otherwise we would react to them, e.g. answer our

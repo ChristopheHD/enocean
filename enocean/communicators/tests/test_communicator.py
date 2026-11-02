@@ -39,6 +39,26 @@ def test_send():
     assert isinstance(com._get_from_send_queue(), Packet)
 
 
+def test_next_packet_is_sent_once_the_transmitter_responded():
+    com = Communicator()
+    for _ in range(2):
+        com.send(Packet(PACKET.COMMON_COMMAND, [0x08]))
+    assert isinstance(com._get_from_send_queue(), Packet)
+    assert com._get_from_send_queue() is None
+    com._buffer.extend(Packet(PACKET.RESPONSE, [0x00]).build())
+    com.parse()
+    assert isinstance(com._get_from_send_queue(), Packet)
+
+
+def test_next_packet_is_sent_without_response_after_a_timeout():
+    com = Communicator()
+    com.RESPONSE_TIMEOUT = 0
+    for _ in range(2):
+        com.send(Packet(PACKET.COMMON_COMMAND, [0x08]))
+    assert isinstance(com._get_from_send_queue(), Packet)
+    assert isinstance(com._get_from_send_queue(), Packet)
+
+
 def test_stop():
     com = Communicator()
     com.stop()
