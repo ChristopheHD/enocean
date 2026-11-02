@@ -324,6 +324,8 @@ class RadioPacket(Packet):
     sender = [0xFF, 0xFF, 0xFF, 0xFF]
     learn = True
     contains_eep = False
+    # SECURE_STATUS of a received secure telegram, None for other telegrams
+    secure_status = None
 
     def __str__(self):
         if self.rorg == RORG.SEC_TI:

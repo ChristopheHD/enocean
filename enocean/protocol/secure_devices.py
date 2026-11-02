@@ -52,18 +52,18 @@ class SecureDevices(object):
         ''' Authenticates and decrypts the data of a secure telegram of the device,
         returns (inner R-ORG, payload) or None if it is rejected '''
         if rorg == RORG.SEC:
-            self.logger.warning('%08X: SEC (0x30) telegrams are not supported', address)
+            self.logger.debug('%08X: SEC (0x30) telegrams are not supported', address)
             return None
         with self._lock:
             state = self._states.get(address, {})
             if 'key' not in state:
-                self.logger.warning('%08X: secure telegram received but no key is known', address)
+                self.logger.debug('%08X: secure telegram received but no key is known', address)
                 return None
             result = security.decrypt(bytes.fromhex(state['key']), state['slf'], rorg, data,
                                       state.get('rlc', 0), self._rlc_window)
             if result is None:
-                self.logger.warning('%08X: secure telegram rejected (wrong key, rolling code out of window or replay)',
-                                    address)
+                self.logger.debug('%08X: secure telegram rejected (wrong key, rolling code out of window or replay)',
+                                  address)
                 return None
             rlc, inner_rorg, payload = result
             self._update(address, rlc=rlc + 1)

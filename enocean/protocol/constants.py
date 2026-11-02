@@ -72,6 +72,22 @@ class PARSE_RESULT(IntEnum):
     CRC_MISMATCH = 0x03
 
 
+# Security status of received secure telegrams, see Communicator.secure_devices
+class SECURE_STATUS(IntEnum):
+    # authenticated and decrypted: the packet contains the telegram of the device
+    DECRYPTED = 0x00
+    # no key is known for the sender
+    UNKNOWN_KEY = 0x01
+    # wrong key, rolling code out of the window or replayed telegram
+    REJECTED = 0x02
+    # security mode not supported, e.g. SEC (0x30) telegrams
+    UNSUPPORTED = 0x03
+    # part of a secure teach-in, the key is not learned (yet)
+    TEACH_IN = 0x04
+    # secure teach-in completed: the key of the sender is learned
+    KEY_LEARNED = 0x05
+
+
 # Data byte indexing
 # Starts from the end, so works on messages of all length.
 class DB0(object):
