@@ -2,12 +2,14 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 import logging
 import datetime
+import itertools
 
 import threading
 try:
     import queue
 except ImportError:
     import Queue as queue
+from enocean.protocol import chaining
 from enocean.protocol.packet import Packet, RadioPacket, UTETeachInPacket
 from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE, RORG, SECURE_STATUS
 
@@ -21,6 +23,8 @@ class Communicator(threading.Thread):
     as the telegrams of the devices, telegrams sent to secure devices are encrypted, and the keys of devices
     sending a secure teach-in are learned when teach_in is set. The secure_status of received secure telegrams
     tells what happened to them.
+
+    Radio telegrams too long for a single radio telegram are sent as chained data messages (R-ORG 0x40).
     '''
     logger = logging.getLogger('enocean.communicators.Communicator')
 
@@ -45,6 +49,8 @@ class Communicator(threading.Thread):
         self.teach_in = teach_in
         # Security state of secure devices (SecureDevices), None to leave secure telegrams as they are
         self.secure_devices = secure_devices
+        # Sequence numbers of chained data messages, which must change between successive chains
+        self._chain_seqs = itertools.cycle((1, 2, 3))
 
     def _get_from_send_queue(self):
         ''' Get message from send queue, if one exists '''
@@ -65,8 +71,20 @@ class Communicator(threading.Thread):
             packet = self.encrypt(packet)
             if packet is None:
                 return False
+            for telegram in self.chain(packet):
+                self.transmit.put(telegram)
+            return True
         self.transmit.put(packet)
         return True
+
+    def chain(self, packet):
+        ''' The telegrams sending the radio packet: the packet itself, or chained data messages if it is too long '''
+        message = packet.data[:-5]
+        if packet.rorg == RORG.CHAINED_VENTILAIRSEC or not chaining.needs_chaining(
+                message, packet.destination_int != 0xFFFFFFFF):
+            return [packet]
+        return [RadioPacket(packet.packet_type, data=list(data) + packet.data[-5:], optional=packet.optional)
+                for data in chaining.chain(message, next(self._chain_seqs))]
 
     def encrypt(self, packet):
         ''' Returns the radio packet encrypted if it is sent to a secure device, the packet itself otherwise.

@@ -12,6 +12,8 @@ DEVICE = [0x01, 0xA2, 0xB3, 0xC4]
 GATEWAY = [0xDE, 0xAD, 0xBE, 0xEF]
 KEY = bytes(range(16))
 PAYLOAD = [0x84, 0x00, 0x00, 0x8A, 0x1A, 0xA0]
+# short enough to be sent in a single telegram once encrypted
+SHORT_PAYLOAD = [0x0F, 0x00, 0x00]
 
 
 def paired(rlc=0, rlc_snd=0):
@@ -118,17 +120,17 @@ def test_key_is_not_learned_when_teach_in_is_disabled():
 
 def test_telegram_sent_to_secure_device_is_encrypted():
     com = Communicator(secure_devices=paired(rlc_snd=7))
-    assert com.send(plain_packet()) is True
+    assert com.send(plain_packet(data=SHORT_PAYLOAD)) is True
     [packet] = sent(com)
     assert packet.rorg == RORG.SEC_ENCAPS
     assert (packet.sender, packet.destination) == (GATEWAY, DEVICE)
-    assert security.decrypt(KEY, 0x8B, packet.rorg, bytes(packet.data[1:-5]), 7) == (7, RORG.VLD, bytes(PAYLOAD))
+    assert security.decrypt(KEY, 0x8B, packet.rorg, bytes(packet.data[1:-5]), 7) == (7, RORG.VLD, bytes(SHORT_PAYLOAD))
     assert com.secure_devices.state(0x01A2B3C4)['rlc_snd'] == 8
 
 
 def test_telegrams_sent_in_clear():
     com = Communicator(secure_devices=paired())
-    teach_in = plain_packet(rorg=RORG.SEC_TI, data=security.build_teach_in(KEY)[0])
+    teach_in = plain_packet(rorg=RORG.SEC_TI, data=security.build_teach_in(KEY, telegrams=3)[0])
     learn_4bs = plain_packet(rorg=RORG.BS4, data=[0x08, 0x28, 0x46, 0x80])
     other_device = plain_packet(destination=[0x01, 0x02, 0x03, 0x04])
     for packet in (teach_in, learn_4bs, other_device):
@@ -140,5 +142,34 @@ def test_telegrams_sent_in_clear():
 def test_telegrams_are_sent_in_clear_without_secure_devices():
     com = Communicator()
     packet = plain_packet()
+    com.send(packet)
+    assert sent(com) == [packet]
+
+
+def test_long_telegram_is_encrypted_then_chained():
+    com = Communicator(secure_devices=paired())
+    program = [0x20, 0x00, 0x00, 0x00, 0x16, 0x80]
+    assert com.send(plain_packet(data=program)) is True
+    packets = sent(com)
+    assert [p.data[:2] for p in packets] == [[0x40, 0x40], [0x40, 0x41]]
+    assert all((p.sender, p.destination) == (GATEWAY, DEVICE) for p in packets)
+    message = packets[0].data[4:-5] + packets[1].data[2:-5]
+    assert len(message) == (packets[0].data[2] << 8 | packets[0].data[3]) + 1
+    assert security.decrypt(KEY, 0x8B, message[0], bytes(message[1:]), 0) == (0, RORG.VLD, bytes(program))
+
+    # The sequence number changes between chains
+    com.send(plain_packet(data=program))
+    assert [p.data[1] for p in sent(com)] == [0x80, 0x81]
+
+
+def test_short_telegram_is_not_chained():
+    com = Communicator(secure_devices=paired())
+    com.send(plain_packet(data=SHORT_PAYLOAD))
+    assert [p.rorg for p in sent(com)] == [RORG.SEC_ENCAPS]
+
+
+def test_long_broadcast_telegram_is_not_chained():
+    com = Communicator()
+    packet = plain_packet(destination=[0xFF, 0xFF, 0xFF, 0xFF], data=list(range(12)))
     com.send(packet)
     assert sent(com) == [packet]
