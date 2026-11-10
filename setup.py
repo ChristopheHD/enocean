@@ -29,4 +29,5 @@ setup(
     install_requires=[
         'enum-compat>=0.0.2',
         'pyserial>=3.0',
+        'cryptography>=3.1',
     ])

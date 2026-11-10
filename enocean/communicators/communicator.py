@@ -2,24 +2,43 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 import logging
 import datetime
+import itertools
+import time
 
 import threading
 try:
     import queue
 except ImportError:
     import Queue as queue
+from enocean.protocol import chaining
 from enocean.protocol.packet import Packet, RadioPacket, UTETeachInPacket
-from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE
+from enocean.protocol.constants import PACKET, PARSE_RESULT, RETURN_CODE, RORG, SECURE_STATUS
 
 
 class Communicator(threading.Thread):
     '''
     Communicator base-class for EnOcean.
     Not to be used directly, only serves as base class for SerialCommunicator etc.
+
+    When given the secure devices (SecureDevices), received secure telegrams are decrypted and delivered
+    as the telegrams of the devices, telegrams sent to secure devices are encrypted, and the keys of devices
+    sending a secure teach-in are learned when teach_in is set. The secure_status of received secure telegrams
+    tells what happened to them.
+
+    Radio telegrams too long for a single radio telegram are sent as chained data messages (R-ORG 0x40).
+
+    A packet is sent once the transmitter has answered the previous one, as ESP3 requires: packets sent in a burst
+    are lost by the transmitter.
     '''
     logger = logging.getLogger('enocean.communicators.Communicator')
 
-    def __init__(self, callback=None, teach_in=True):
+    # R-ORGs never encrypted when sent: already secure, chained or teach-in telegrams
+    UNENCRYPTED_RORGS = (RORG.SEC, RORG.SEC_ENCAPS, RORG.SEC_TI, RORG.CHAINED, RORG.CHAINED_VENTILAIRSEC, RORG.UTE)
+
+    # Time to wait for the response of the transmitter to a packet before sending the next one, in seconds
+    RESPONSE_TIMEOUT = 0.5
+
+    def __init__(self, callback=None, teach_in=True, secure_devices=None):
         super(Communicator, self).__init__()
         # Create an event to stop the thread
         self._stop_flag = threading.Event()
@@ -35,13 +54,25 @@ class Communicator(threading.Thread):
         # Should new messages be learned automatically? Defaults to True.
         # TODO: Not sure if we should use CO_WR_LEARNMODE??
         self.teach_in = teach_in
+        # Security state of secure devices (SecureDevices), None to leave secure telegrams as they are
+        self.secure_devices = secure_devices
+        # Sequence numbers of chained data messages, which must change between successive chains
+        self._chain_seqs = itertools.cycle((1, 2, 3))
+        # Time until which the response to the last packet sent is awaited, None once received
+        self._response_deadline = None
 
     def _get_from_send_queue(self):
-        ''' Get message from send queue, if one exists '''
+        ''' Get message from send queue, if one exists and the response to the previous one was received '''
+        if self._response_deadline is not None:
+            if time.monotonic() < self._response_deadline:
+                return None
+            self.logger.warning('No response from the transmitter to the last packet sent')
+            self._response_deadline = None
         try:
             packet = self.transmit.get(block=False)
             self.logger.info('Sending packet')
             self.logger.debug(packet)
+            self._response_deadline = time.monotonic() + self.RESPONSE_TIMEOUT
             return packet
         except queue.Empty:
             pass
@@ -51,8 +82,63 @@ class Communicator(threading.Thread):
         if not isinstance(packet, Packet):
             self.logger.error('Object to send must be an instance of Packet')
             return False
+        if isinstance(packet, RadioPacket):
+            packet = self.encrypt(packet)
+            if packet is None:
+                return False
+            for telegram in self.chain(packet):
+                self.transmit.put(telegram)
+            return True
         self.transmit.put(packet)
         return True
+
+    def chain(self, packet):
+        ''' The telegrams sending the radio packet: the packet itself, or chained data messages if it is too long '''
+        message = packet.data[:-5]
+        if packet.rorg == RORG.CHAINED_VENTILAIRSEC or not chaining.needs_chaining(
+                message, packet.destination_int != 0xFFFFFFFF):
+            return [packet]
+        return [RadioPacket(packet.packet_type, data=list(data) + packet.data[-5:], optional=packet.optional)
+                for data in chaining.chain(message, next(self._chain_seqs))]
+
+    def encrypt(self, packet):
+        ''' Returns the radio packet encrypted if it is sent to a secure device, the packet itself otherwise.
+        None if it cannot be encrypted. '''
+        if (self.secure_devices is None or packet.rorg in self.UNENCRYPTED_RORGS
+                or (packet.rorg in (RORG.BS1, RORG.BS4) and packet.learn)
+                or not self.secure_devices.is_secure(packet.destination_int)):
+            return packet
+        result = self.secure_devices.encrypt(packet.destination_int, packet.rorg, packet.data[1:-5])
+        if result is None:
+            return None
+        rorg, data = result
+        return RadioPacket(packet.packet_type, data=[rorg] + list(data) + packet.data[-5:], optional=packet.optional)
+
+    def _decrypt(self, packet):
+        ''' Returns the telegram of the device for a received secure telegram, or the packet with its secure_status '''
+        if packet.rorg == RORG.SEC_TI:
+            learned = self.teach_in and self.secure_devices.receive_teach_in(packet.sender_int, packet.data[1:-5])
+            packet.secure_status = SECURE_STATUS.KEY_LEARNED if learned else SECURE_STATUS.TEACH_IN
+            return packet
+        if packet.rorg not in (RORG.SEC, RORG.SEC_ENCAPS):
+            return packet
+        if not self.secure_devices.is_secure(packet.sender_int):
+            packet.secure_status = SECURE_STATUS.UNKNOWN_KEY
+            return packet
+        if packet.rorg == RORG.SEC:
+            packet.secure_status = SECURE_STATUS.UNSUPPORTED
+            return packet
+        result = self.secure_devices.decrypt(packet.sender_int, packet.rorg, packet.data[1:-5])
+        if result is None:
+            packet.secure_status = SECURE_STATUS.REJECTED
+            return packet
+        rorg, payload = result
+        packet_class = UTETeachInPacket if rorg == RORG.UTE else RadioPacket
+        decrypted = packet_class(packet.packet_type, data=[rorg] + list(payload) + packet.data[-5:],
+                                 optional=packet.optional)
+        decrypted.received = packet.received
+        decrypted.secure_status = SECURE_STATUS.DECRYPTED
+        return decrypted
 
     def stop(self):
         self._stop_flag.set()
@@ -70,6 +156,9 @@ class Communicator(threading.Thread):
             if status == PARSE_RESULT.OK and packet:
                 packet.received = datetime.datetime.now()
 
+                if packet.packet_type == PACKET.RESPONSE:
+                    self._response_deadline = None
+
                 # Ignore radio packets sent from our own Base ID, e.g. our own packets
                 # repeated by a repeater. Otherwise we would react to them, e.g. answer our
                 # own UTE teach-in response again and again.
@@ -77,6 +166,9 @@ class Communicator(threading.Thread):
                         and list(packet.sender) == list(self._base_id)):
                     self.logger.debug('Ignoring packet sent from own Base ID.')
                     continue
+
+                if isinstance(packet, RadioPacket) and self.secure_devices is not None:
+                    packet = self._decrypt(packet)
 
                 # Only answer if the device expects a response (UTE DB6.6 = 0).
                 # Some devices, e.g. LUNOS UNI-EO, send unidirectional requests

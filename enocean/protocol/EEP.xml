@@ -4741,6 +4741,429 @@
         </data>
       </profile>
     </profiles>
+    <profiles func="0x33" description="Intelligent, Bi-directional Heaters and Controllers">
+      <profile type="0x00" description="Type 0x00">
+        <command description="Message Identifier" shortcut="MID" offset="0" size="4">
+          <item description="Gateway request message type" value="0" />
+          <item description="Sensor parameters" value="1" />
+          <item description="Program" value="2" />
+          <item description="Time and date" value="3" />
+          <item description="Request and status" value="8" />
+          <item description="Heater parameters" value="9" />
+          <item description="Value of air, hygro., pressure and temp." value="12" />
+        </command>
+        <data command="0" bits="3">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Gateway request message type" value="0" />
+          </enum>
+          <enum description="Request Frame" shortcut="REQ" offset="4" size="4">
+            <rangeitem description="Reserved" start="0" end="7" />
+            <item description="Question: status and flags" value="8" />
+            <item description="Question: parameters heaters" value="9" />
+            <item description="Question: sensor CO/HYGRO/Sound" value="10" />
+            <item description="Question: sensor particle/radioactivity" value="11" />
+            <item description="Question: sensor air flow, hygrometry, pressure and temperature" value="12" />
+            <item description="Information to heater" value="13" />
+            <item description="Reserved" value="14" />
+            <item description="Acknowledge frame" value="15" />
+          </enum>
+          <value description="External Temperature" shortcut="EXT" offset="8" size="9" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
+            </scale>
+          </value>
+        </data>
+        <data command="1" bits="4">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Sensor parameters" value="1" />
+          </enum>
+          <enum description="Window Open Detection Status" shortcut="WOS" offset="4" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="PIR Detection Status" shortcut="PIS" offset="5" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Reference Temperature Status" shortcut="RTS" offset="6" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="COV Sensor" shortcut="CVS" offset="7" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="CO Sensor" shortcut="COS" offset="8" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="CO2 Sensor" shortcut="C2S" offset="9" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Particles 1 Sensor" shortcut="P1S" offset="10" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Particles 2.5 Sensor" shortcut="P2S" offset="11" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Particles 10 Sensor" shortcut="P10S" offset="12" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Radio Activity Sensor" shortcut="RAS" offset="13" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Sound Sensor" shortcut="SOS" offset="14" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Hygrometry Sensor" shortcut="HYS" offset="15" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Air Moving Sensor" shortcut="AMS" offset="16" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Pressure Sensor" shortcut="PRS" offset="17" size="1">
+            <item description="Disabled" value="0" />
+            <item description="Enabled" value="1" />
+          </enum>
+          <enum description="Temperature Scale Status" shortcut="TSS" offset="18" size="2">
+            <item description="No change" value="0" />
+            <item description="Default" value="1" />
+            <item description="°Celsius" value="2" />
+            <item description="°Fahrenheit" value="3" />
+          </enum>
+          <enum description="Time Notation Status" shortcut="TNS" offset="20" size="2">
+            <item description="No change" value="0" />
+            <item description="Default" value="1" />
+            <item description="24 h" value="2" />
+            <item description="12 h" value="3" />
+          </enum>
+          <enum description="Display Content Status" shortcut="DCS" offset="22" size="3">
+            <item description="No change" value="0" />
+            <item description="Default" value="1" />
+            <item description="Time" value="2" />
+            <item description="Room temperature (internal)" value="3" />
+            <item description="Room temperature (external)" value="4" />
+            <item description="Temperature setpoint" value="5" />
+            <item description="Display off" value="6" />
+            <item description="Reserved" value="7" />
+          </enum>
+          <enum description="Derogation Status" shortcut="DGS" offset="25" size="1">
+            <item description="Derogation is not allowed" value="0" />
+            <item description="Derogation is allowed" value="1" />
+          </enum>
+        </data>
+        <data command="2" bits="6">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Program" value="2" />
+          </enum>
+          <enum description="Scheduled Order Type" shortcut="TPT" offset="4" size="1">
+            <item description="One time" value="0" />
+            <item description="Weekly" value="1" />
+          </enum>
+          <enum description="End Time Day" shortcut="ETD" offset="5" size="3">
+            <item description="Monday" value="0" />
+            <item description="Tuesday" value="1" />
+            <item description="Wednesday" value="2" />
+            <item description="Thursday" value="3" />
+            <item description="Friday" value="4" />
+            <item description="Saturday" value="5" />
+            <item description="Sunday" value="6" />
+            <item description="Reserved" value="7" />
+          </enum>
+          <value description="End Time Minute" shortcut="ETM" offset="8" size="6" unit="Min">
+            <range>
+              <min>0</min>
+              <max>59</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>59</max>
+            </scale>
+          </value>
+          <value description="End Time Hour" shortcut="ETH" offset="14" size="5" unit="Hour">
+            <range>
+              <min>0</min>
+              <max>23</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>23</max>
+            </scale>
+          </value>
+          <enum description="Start Time Day" shortcut="STD" offset="19" size="3">
+            <item description="Monday" value="0" />
+            <item description="Tuesday" value="1" />
+            <item description="Wednesday" value="2" />
+            <item description="Thursday" value="3" />
+            <item description="Friday" value="4" />
+            <item description="Saturday" value="5" />
+            <item description="Sunday" value="6" />
+            <item description="Reserved" value="7" />
+          </enum>
+          <value description="Start Time Minute" shortcut="STM" offset="22" size="6" unit="Min">
+            <range>
+              <min>0</min>
+              <max>59</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>59</max>
+            </scale>
+          </value>
+          <value description="Start Time Hour" shortcut="STH" offset="28" size="5" unit="Hour">
+            <range>
+              <min>0</min>
+              <max>23</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>23</max>
+            </scale>
+          </value>
+          <value description="Temperature Setpoint" shortcut="TSP" offset="33" size="9" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
+            </scale>
+          </value>
+          <enum description="Clear Schedule" shortcut="CSC" offset="42" size="1">
+            <item description="Set" value="0" />
+            <item description="Clear" value="1" />
+          </enum>
+        </data>
+        <data command="3" bits="5">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Time and date" value="3" />
+          </enum>
+          <value description="Day" shortcut="DAY" offset="4" size="5" unit="Day">
+            <range>
+              <min>1</min>
+              <max>31</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>31</max>
+            </scale>
+          </value>
+          <value description="Month" shortcut="MON" offset="9" size="4" unit="Mon">
+            <range>
+              <min>1</min>
+              <max>12</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>12</max>
+            </scale>
+          </value>
+          <value description="Year" shortcut="YR" offset="13" size="12" unit="Year">
+            <range>
+              <min>0</min>
+              <max>4095</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>4095</max>
+            </scale>
+          </value>
+          <value description="Minute" shortcut="MIN" offset="25" size="6" unit="Min">
+            <range>
+              <min>0</min>
+              <max>59</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>59</max>
+            </scale>
+          </value>
+          <value description="Hour" shortcut="HR" offset="31" size="5" unit="Hour">
+            <range>
+              <min>0</min>
+              <max>23</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>23</max>
+            </scale>
+          </value>
+          <enum description="Day Week" shortcut="DAYW" offset="36" size="3">
+            <item description="Monday" value="0" />
+            <item description="Tuesday" value="1" />
+            <item description="Wednesday" value="2" />
+            <item description="Thursday" value="3" />
+            <item description="Friday" value="4" />
+            <item description="Saturday" value="5" />
+            <item description="Sunday" value="6" />
+            <item description="Reserved" value="7" />
+          </enum>
+        </data>
+        <data command="8" bits="6">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Request and status" value="8" />
+          </enum>
+          <enum description="Request Frame" shortcut="REQ" offset="4" size="4">
+            <item description="Question External Temp." value="0" />
+            <item description="Question Sensor parameters" value="1" />
+            <item description="Question Program" value="2" />
+            <item description="Question Time and date" value="3" />
+            <item description="Information to gateway" value="4" />
+            <rangeitem description="Reserved" start="5" end="7" />
+            <rangeitem description="Reserved for gateway frame" start="8" end="14" />
+            <item description="Acknowledge frame" value="15" />
+          </enum>
+          <value description="Error Flag (bit 0: temperature sensor is open, bit 1: temperature sensor is short circuit, bit 2: temperature measured is greater than 50°C, bit 3: error between internal temp and external temp is greater than 4°C)" shortcut="ERF" offset="8" size="16">
+            <range>
+              <min>0</min>
+              <max>65535</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>65535</max>
+            </scale>
+          </value>
+          <enum description="Heating Flag" shortcut="HTF" offset="24" size="1">
+            <item description="No heating up" value="0" />
+            <item description="Heating up" value="1" />
+          </enum>
+          <enum description="Pilot Wire Flag" shortcut="PWF" offset="25" size="2">
+            <item description="No pilot wire" value="0" />
+            <item description="Pilot wire active" value="1" />
+            <item description="Pilot wire -1" value="2" />
+            <item description="Pilot wire -2" value="3" />
+          </enum>
+          <enum description="Window Open Detection Flag" shortcut="WOF" offset="27" size="2">
+            <item description="Disabled" value="0" />
+            <item description="Close" value="1" />
+            <item description="Open" value="2" />
+            <item description="Reserved" value="3" />
+          </enum>
+          <enum description="PIR Flag" shortcut="PIF" offset="29" size="2">
+            <item description="Disabled" value="0" />
+            <item description="No movement detected" value="1" />
+            <item description="Movement detected" value="2" />
+            <item description="Reserved" value="3" />
+          </enum>
+          <enum description="Key Lock User Status" shortcut="KLU" offset="31" size="1">
+            <item description="Key Lock is disabled" value="0" />
+            <item description="Key Lock is enabled" value="1" />
+          </enum>
+          <enum description="Reference Temperature Flag" shortcut="RTF" offset="32" size="1">
+            <item description="Internal" value="0" />
+            <item description="External" value="1" />
+          </enum>
+          <enum description="Derogation Flag" shortcut="DGF" offset="33" size="1">
+            <item description="No derogation" value="0" />
+            <item description="Derogation active" value="1" />
+          </enum>
+          <value description="Internal Temperature" shortcut="INT" offset="34" size="9" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
+            </scale>
+          </value>
+        </data>
+        <data command="9" bits="6">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Heater parameters" value="9" />
+          </enum>
+          <value description="Energy Measurement" shortcut="EM" offset="4" size="24" unit="kWh">
+            <range>
+              <min>0</min>
+              <max>16777215</max>
+            </range>
+            <scale>
+              <min>0.0</min>
+              <max>1677721.5</max>
+            </scale>
+          </value>
+          <value description="Derogation Temperature Setpoint" shortcut="DTS" offset="28" size="9" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
+            </scale>
+          </value>
+          <value description="Firmware Version" shortcut="FWV" offset="37" size="10">
+            <range>
+              <min>0</min>
+              <max>1024</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>1024</max>
+            </scale>
+          </value>
+        </data>
+        <data command="12" bits="6">
+          <enum description="Message Identifier" shortcut="MID" offset="0" size="4">
+            <item description="Value of air, hygro., pressure and temp." value="12" />
+          </enum>
+          <value description="Air Moving" shortcut="AMV" offset="4" size="4" unit="m/s">
+            <range>
+              <min>1</min>
+              <max>15</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>15</max>
+            </scale>
+          </value>
+          <value description="Pressure Value" shortcut="PRV" offset="15" size="10" unit="hPa">
+            <range>
+              <min>1</min>
+              <max>1023</max>
+            </range>
+            <scale>
+              <min>500</min>
+              <max>1150</max>
+            </scale>
+          </value>
+          <value description="Hygrometry Value" shortcut="HYV" offset="25" size="8" unit="%">
+            <range>
+              <min>1</min>
+              <max>200</max>
+            </range>
+            <scale>
+              <min>1</min>
+              <max>100</max>
+            </scale>
+          </value>
+          <value description="Internal Temperature" shortcut="INT" offset="33" size="11" unit="°C">
+            <range>
+              <min>1</min>
+              <max>500</max>
+            </range>
+            <scale>
+              <min>0.1</min>
+              <max>50.0</max>
+            </scale>
+          </value>
+        </data>
+      </profile>
+    </profiles>
     <profiles func="0x50" description="Heat Recovery Ventilation">
       <profile type="0x00" description="Type 0x00 (single room ventilation unit)">
         <command description="Message Type" shortcut="MT" offset="0" size="3">

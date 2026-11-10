@@ -49,7 +49,9 @@ class SerialCommunicator(Communicator):
             # Read chars from serial port as hex numbers
             try:
                 if self.__ser.is_open:
-                    self._buffer.extend(bytearray(self.__ser.read(16)))
+                    # Read what has arrived, without waiting for more: the next packet is sent
+                    # once the response to the previous one is received
+                    self._buffer.extend(bytearray(self.__ser.read(max(1, self.__ser.in_waiting))))
                 else:
                     time.sleep(1)
                     self._reset_serial_port()
