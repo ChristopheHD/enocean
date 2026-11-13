@@ -7,9 +7,8 @@ from enocean.protocol.eep import EEP
 ROW_FORMAT = '|{:8s}|{:50s}|{:8s}|{:70s}|\n'
 
 
-eep = EEP()
-
-with codecs.open('SUPPORTED_PROFILES.md', 'w', 'utf-8') as f_handle:
+def generate(f_handle):
+    eep = EEP()
     f_handle.write('# Supported profiles\n')
     f_handle.write('All profiles (should) correspond to the official [EEP](http://www.enocean-alliance.org/eep/) by EnOcean.\n\n')
 
@@ -65,3 +64,8 @@ with codecs.open('SUPPORTED_PROFILES.md', 'w', 'utf-8') as f_handle:
 
             f_handle.write('</blockquote></details>\n\n')
         f_handle.write('</blockquote></details>\n')
+
+
+if __name__ == '__main__':
+    with codecs.open('SUPPORTED_PROFILES.md', 'w', 'utf-8') as f_handle:
+        generate(f_handle)
