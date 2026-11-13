@@ -2422,6 +2422,10 @@
         <command description="Command ID" shortcut="COM" offset="0" size="8">
           <item description="Switching" value="1" />
           <item description="Dimming" value="2" />
+          <item description="Setpoint shift" value="3" />
+          <item description="Basic Setpoint" value="4" />
+          <item description="Control variable" value="5" />
+          <item description="Fan stage" value="6" />
           <item description="Blind Central Command" value="7" />
         </command>
         <data command="1">
@@ -2438,6 +2442,10 @@
               <max>6553.5</max>
             </scale>
           </value>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
+          </enum>
           <enum description="Lock for duration time if time >0, unlimited time of no time specified. Locking may be cleared with &quot;unlock&quot;. During lock phase no other commands will be accepted or executed" shortcut="LCK" offset="29" size="1">
             <item description="Unlock" value="0" />
             <item description="Lock" value="1" />
@@ -2476,6 +2484,10 @@
               <max>255</max>
             </scale>
           </value>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
+          </enum>
           <enum shortcut="EDIMR" description="Dimming Range" offset="29" size="1">
             <item description="Absolute value" value="0" />
             <item description="Relative value" value="1" />
@@ -2487,6 +2499,98 @@
           <enum shortcut="SW" description="Switching command" offset="31" size="1">
             <item description="Off" value="0" />
             <item description="On" value="1" />
+          </enum>
+        </data>
+        <data command="3">
+          <enum shortcut="COM" description="Command ID" offset="0" size="8">
+            <rangeitem description="Command ID {value}" start="0" end="13" />
+          </enum>
+          <value shortcut="SP" description="Setpoint shift" offset="16" size="8" unit="K">
+            <range>
+              <min>0</min>
+              <max>255</max>
+            </range>
+            <scale>
+              <min>-12.7</min>
+              <max>12.8</max>
+            </scale>
+          </value>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
+          </enum>
+        </data>
+        <data command="4">
+          <enum shortcut="COM" description="Command ID" offset="0" size="8">
+            <rangeitem description="Command ID {value}" start="0" end="13" />
+          </enum>
+          <value shortcut="BSP" description="Basic Setpoint" offset="16" size="8" unit="°C">
+            <range>
+              <min>0</min>
+              <max>255</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>51.2</max>
+            </scale>
+          </value>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
+          </enum>
+        </data>
+        <data command="5">
+          <enum shortcut="COM" description="Command ID" offset="0" size="8">
+            <rangeitem description="Command ID {value}" start="0" end="13" />
+          </enum>
+          <value shortcut="CVOV" description="Control variable override" offset="16" size="8" unit="%">
+            <range>
+              <min>0</min>
+              <max>255</max>
+            </range>
+            <scale>
+              <min>0</min>
+              <max>100</max>
+            </scale>
+          </value>
+          <enum description="Controller mode" shortcut="CM" offset="25" size="2">
+            <item description="Automatic mode selection" value="0" />
+            <item description="Heating" value="1" />
+            <item description="Cooling" value="2" />
+            <item description="Off" value="3" />
+          </enum>
+          <enum description="Controller state" shortcut="CS" offset="27" size="1">
+            <item description="Automatic" value="0" />
+            <item description="Override" value="1" />
+          </enum>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
+          </enum>
+          <enum description="Energy hold off" shortcut="ENHO" offset="29" size="1">
+            <item description="Normal" value="0" />
+            <item description="Energy holdoff / Dew point" value="1" />
+          </enum>
+          <enum description="Room occupancy" shortcut="RMOCC" offset="30" size="2">
+            <item description="Occupied" value="0" />
+            <item description="Unoccupied" value="1" />
+            <item description="Standby" value="2" />
+          </enum>
+        </data>
+        <data command="6">
+          <enum shortcut="COM" description="Command ID" offset="0" size="8">
+            <rangeitem description="Command ID {value}" start="0" end="13" />
+          </enum>
+          <enum description="Fan stage override" shortcut="FO" offset="16" size="8">
+            <item description="Stage 0" value="0" />
+            <item description="Stage 1" value="1" />
+            <item description="Stage 2" value="2" />
+            <item description="Stage 3" value="3" />
+            <item description="Auto" value="255" />
+          </enum>
+          <enum description="LRN bit" shortcut="LRNB" offset="28" size="1">
+            <item description="Teach in telegram" value="0" />
+            <item description="Data telegram" value="1" />
           </enum>
         </data>
         <data command="7">
