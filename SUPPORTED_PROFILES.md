@@ -1205,6 +1205,8 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |--------|--------------------------------------------------|--------|----                                                                  |
 |COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
 |TIM     |Time in 1/10 seconds. 0 = no time specifed        |value   |1.0-65535.0 ↔ 0.1-6553.5 s                                            |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
 |LCK     |Lock for duration time if time >0, unlimited time of no time specified. Locking may be cleared with "unlock". During lock phase no other commands will be accepted or executed|enum    |0 - Unlock                                                            |
 |        |                                                  |        |1 - Lock                                                              |
 |DEL     |Delay or duration (if Time > 0); 0 = Duration (Execute switching command immediately and switch back after duration) 1 = Delay (Execute switching command after delay)|enum    |0 - Duration                                                          |
@@ -1218,12 +1220,61 @@ All profiles (should) correspond to the official [EEP](http://www.enocean-allian
 |COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
 |EDIM    |Dimming value (absolute [0...255] or relative [0...100])|value   |0.0-255.0 ↔ 0.0-255.0 %                                               |
 |RMP     |Ramping time in seconds, 0 = no ramping, 1...255 = seconds to 100%|value   |0.0-255.0 ↔ 0.0-255.0 s                                               |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
 |EDIMR   |Dimming Range                                     |enum    |0 - Absolute value                                                    |
 |        |                                                  |        |1 - Relative value                                                    |
 |STR     |Store final value                                 |enum    |0 - No                                                                |
 |        |                                                  |        |1 - Yes                                                               |
 |SW      |Switching command                                 |enum    |0 - Off                                                               |
 |        |                                                  |        |1 - On                                                                |
+
+###### command: 3
+|shortcut|description                                       |type    |values                                                                |
+|--------|--------------------------------------------------|--------|----                                                                  |
+|COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
+|SP      |Setpoint shift                                    |value   |0.0-255.0 ↔ -12.7-12.8 K                                              |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
+
+###### command: 4
+|shortcut|description                                       |type    |values                                                                |
+|--------|--------------------------------------------------|--------|----                                                                  |
+|COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
+|BSP     |Basic Setpoint                                    |value   |0.0-255.0 ↔ 0.0-51.2 °C                                               |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
+
+###### command: 5
+|shortcut|description                                       |type    |values                                                                |
+|--------|--------------------------------------------------|--------|----                                                                  |
+|COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
+|CVOV    |Control variable override                         |value   |0.0-255.0 ↔ 0.0-100.0 %                                               |
+|CM      |Controller mode                                   |enum    |0 - Automatic mode selection                                          |
+|        |                                                  |        |1 - Heating                                                           |
+|        |                                                  |        |2 - Cooling                                                           |
+|        |                                                  |        |3 - Off                                                               |
+|CS      |Controller state                                  |enum    |0 - Automatic                                                         |
+|        |                                                  |        |1 - Override                                                          |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
+|ENHO    |Energy hold off                                   |enum    |0 - Normal                                                            |
+|        |                                                  |        |1 - Energy holdoff / Dew point                                        |
+|RMOCC   |Room occupancy                                    |enum    |0 - Occupied                                                          |
+|        |                                                  |        |1 - Unoccupied                                                        |
+|        |                                                  |        |2 - Standby                                                           |
+
+###### command: 6
+|shortcut|description                                       |type    |values                                                                |
+|--------|--------------------------------------------------|--------|----                                                                  |
+|COM     |Command ID                                        |enum    |0-13 - Command ID {value}                                             |
+|FO      |Fan stage override                                |enum    |0 - Stage 0                                                           |
+|        |                                                  |        |1 - Stage 1                                                           |
+|        |                                                  |        |2 - Stage 2                                                           |
+|        |                                                  |        |3 - Stage 3                                                           |
+|        |                                                  |        |255 - Auto                                                            |
+|LRNB    |LRN bit                                           |enum    |0 - Teach in telegram                                                 |
+|        |                                                  |        |1 - Data telegram                                                     |
 
 ###### command: 7
 |shortcut|description                                       |type    |values                                                                |
