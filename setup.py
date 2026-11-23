@@ -4,11 +4,19 @@ try:
 except ImportError:
     from distutils.core import setup
 
+import io
+import os
+
+
+here = os.path.abspath(os.path.dirname(__file__))
+with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as readme:
+    README = readme.read()
+
 setup(
     name='enocean',
     version='1.0.0',
     description='EnOcean serial protocol implementation',
-    long_description='A Python library for reading and controlling EnOcean devices.',
+    long_description=README,
     author='Kimmo Huoman',
     author_email='kipenroskaposti@gmail.com',
     maintainer='Christophe Hardouin Duparc',
