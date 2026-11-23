@@ -6,11 +6,14 @@ except ImportError:
 
 setup(
     name='enocean',
-    version='0.60.2',
+    version='1.0.0',
     description='EnOcean serial protocol implementation',
+    long_description='A Python library for reading and controlling EnOcean devices.',
     author='Kimmo Huoman',
     author_email='kipenroskaposti@gmail.com',
-    url='https://github.com/kipe/enocean',
+    maintainer='Christophe Hardouin Duparc',
+    maintainer_email='christophe.hardouin.duparc@gmail.com',
+    url='https://github.com/ChristopheHD/enocean',
     classifiers = [
         'License :: OSI Approved :: MIT License',
     ],
@@ -27,7 +30,6 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        'enum-compat>=0.0.2',
-        'pyserial>=3.0',
+        'pyserial>=3.5',
         'cryptography>=3.1',
     ])
